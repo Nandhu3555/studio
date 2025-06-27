@@ -33,36 +33,39 @@ export function BookProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  useEffect(() => {
-    if (isLoaded) {
-      try {
-        // To avoid exceeding the localStorage quota, we replace large data URIs
-        // from user-uploaded files with placeholders before saving. This means
-        // the specific files won't persist across reloads, but it prevents the app from crashing.
-        const booksForStorage = books.map(book => {
-          const bookToStore = { ...book };
-          if (bookToStore.imageUrl.startsWith('data:image')) {
-            bookToStore.imageUrl = 'https://placehold.co/400x600/3F51B5/E8EAF6';
-          }
-          if (bookToStore.pdfUrl.startsWith('data:application/pdf')) {
-            bookToStore.pdfUrl = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
-          }
-          return bookToStore;
+  const saveBooks = (booksToSave: Book[]) => {
+    if (!isLoaded) return;
+    try {
+      localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(booksToSave));
+    } catch (error) {
+      if (error instanceof DOMException && (error.name === 'QuotaExceededError' || error.code === 22)) {
+        console.warn("LocalStorage quota exceeded. The latest changes will not be persisted.");
+        toast({
+          variant: "destructive",
+          title: "File Too Large to Save",
+          description: "The uploaded file is too large to be saved for future sessions. It will remain available until you refresh the page.",
+          duration: 9000,
         });
-
-        localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(booksForStorage));
-      } catch (error) {
+      } else {
         console.error("Could not write to local storage for books:", error);
       }
     }
-  }, [books, isLoaded]);
+  };
 
   const addBook = (book: Book) => {
-    setBooks(prevBooks => [book, ...prevBooks]);
+    setBooks(prevBooks => {
+      const newBooks = [book, ...prevBooks];
+      saveBooks(newBooks);
+      return newBooks;
+    });
   };
 
   const deleteBook = (bookId: string) => {
-    setBooks(prev => prev.filter(book => book.id !== bookId));
+    setBooks(prev => {
+        const newBooks = prev.filter(book => book.id !== bookId);
+        saveBooks(newBooks);
+        return newBooks;
+    });
     toast({
       title: "Book Deleted",
       description: "The book has been removed from the library.",
