@@ -76,8 +76,14 @@ export default function BookDetailPage() {
           url: window.location.href,
         });
       } catch (error) {
-        console.error('Share failed:', error);
-        // Fallback to copying the link if the user denies permission or an error occurs
+        // "Permission denied" (NotAllowedError) and user cancellation (AbortError) are expected use-cases,
+        // not true errors. We'll ignore them and gracefully fall back to copying the link.
+        if (error instanceof DOMException && (error.name === "AbortError" || error.name === "NotAllowedError")) {
+          // Silently fall back.
+        } else {
+          // Log other, unexpected errors.
+          console.error("Share failed with an unexpected error:", error);
+        }
         fallbackShare();
       }
     } else {
