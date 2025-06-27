@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFlow } from "@genkit-ai/next/client";
 import { generateBookSummary } from "@/ai/flows/generate-book-summary";
 import { books, categories as bookCategories, type Book } from "@/lib/mock-data";
 
@@ -70,12 +69,16 @@ function AdminDashboard() {
     });
   };
 
+  const handleBookAdded = (newBook: Book) => {
+    setCurrentBooks(prev => [newBook, ...prev]);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold font-headline text-primary mb-8">Admin Dashboard</h1>
       <div className="grid lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1">
-          <UploadBookForm onBookAdded={(newBook) => setCurrentBooks(prev => [newBook, ...prev])} />
+          <UploadBookForm onBookAdded={handleBookAdded} />
         </div>
         <div className="lg:col-span-2">
           <Card>
@@ -117,7 +120,7 @@ function AdminDashboard() {
 
 function UploadBookForm({ onBookAdded }: { onBookAdded: (book: Book) => void }) {
   const { toast } = useToast();
-  const [generateSummary, { data: summaryData, loading }] = useFlow(generateBookSummary);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<UploadBookValues>({
     resolver: zodResolver(uploadBookSchema),
@@ -130,8 +133,9 @@ function UploadBookForm({ onBookAdded }: { onBookAdded: (book: Book) => void }) 
   });
 
   async function onSubmit(values: UploadBookValues) {
+    setLoading(true);
     try {
-      const summaryResult = await generateSummary({
+      const summaryResult = await generateBookSummary({
         bookTitle: values.bookTitle,
         bookDescription: values.bookDescription,
       });
@@ -166,6 +170,8 @@ function UploadBookForm({ onBookAdded }: { onBookAdded: (book: Book) => void }) 
         title: "Upload Failed",
         description: "There was an error processing the book.",
       });
+    } finally {
+        setLoading(false);
     }
   }
 
