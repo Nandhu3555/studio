@@ -36,7 +36,21 @@ export function BookProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isLoaded) {
       try {
-        localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
+        // To avoid exceeding the localStorage quota, we replace large data URIs
+        // from user-uploaded files with placeholders before saving. This means
+        // the specific files won't persist across reloads, but it prevents the app from crashing.
+        const booksForStorage = books.map(book => {
+          const bookToStore = { ...book };
+          if (bookToStore.imageUrl.startsWith('data:image')) {
+            bookToStore.imageUrl = 'https://placehold.co/400x600/3F51B5/E8EAF6';
+          }
+          if (bookToStore.pdfUrl.startsWith('data:application/pdf')) {
+            bookToStore.pdfUrl = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+          }
+          return bookToStore;
+        });
+
+        localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(booksForStorage));
       } catch (error) {
         console.error("Could not write to local storage for books:", error);
       }
