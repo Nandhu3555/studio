@@ -21,13 +21,24 @@ import { useBooks } from "@/context/BookContext";
 import { useUsers } from "@/context/UserContext";
 import { useCategories } from "@/context/CategoryContext";
 
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 5000000; // 5MB
+
 const uploadBookSchema = z.object({
   bookTitle: z.string().min(3, "Title must be at least 3 characters"),
   bookAuthor: z.string().min(3, "Author must be at least 3 characters"),
   year: z.coerce.number().min(1000, "Please enter a valid year").max(new Date().getFullYear(), "Year cannot be in the future"),
   bookDescription: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
-  pdfFile: z.any().refine(files => files?.length > 0, "A PDF file is required."),
+  imageFile: z
+    .any()
+    .refine((files) => files?.length === 1, "Book image is required.")
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      ".jpg, .jpeg, .png and .webp files are accepted."
+    ),
+  pdfFile: z.any().refine((files) => files?.length === 1, "A PDF file is required."),
 });
 type UploadBookValues = z.infer<typeof uploadBookSchema>;
 
@@ -162,6 +173,15 @@ function AdminDashboard() {
   );
 }
 
+const fileToDataUrl = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 function UploadBookForm() {
   const { addBook } = useBooks();
   const { categories } = useCategories();
@@ -176,16 +196,22 @@ function UploadBookForm() {
       bookDescription: "",
       category: "",
       year: undefined,
+      imageFile: undefined,
+      pdfFile: undefined,
     },
   });
 
   async function onSubmit(values: UploadBookValues) {
     setLoading(true);
     try {
-      const summaryResult = await generateBookSummary({
-        bookTitle: values.bookTitle,
-        bookDescription: values.bookDescription,
-      });
+      const [imageUrl, pdfUrl, summaryResult] = await Promise.all([
+        fileToDataUrl(values.imageFile[0]),
+        fileToDataUrl(values.pdfFile[0]),
+        generateBookSummary({
+          bookTitle: values.bookTitle,
+          bookDescription: values.bookDescription,
+        }),
+      ]);
 
       if (summaryResult?.summary) {
         const newBook: Book = {
@@ -195,11 +221,11 @@ function UploadBookForm() {
             year: values.year,
             description: values.bookDescription,
             category: values.category,
-            imageUrl: "https://placehold.co/400x600/3F51B5/E8EAF6",
-            data_ai_hint: "book cover",
+            imageUrl: imageUrl,
+            data_ai_hint: "",
             likes: 0,
             dislikes: 0,
-            pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+            pdfUrl: pdfUrl,
             summary: summaryResult.summary
         };
         addBook(newBook);
@@ -296,6 +322,19 @@ function UploadBookForm() {
                     </Select>
                   <FormMessage />
                 </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="imageFile"
+              render={({ field }) => (
+                 <FormItem>
+                    <FormLabel>Book Image</FormLabel>
+                    <FormControl>
+                        <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files)} />
+                    </FormControl>
+                    <FormMessage />
+                 </FormItem>
               )}
             />
             <FormField
