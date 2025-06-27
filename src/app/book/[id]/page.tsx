@@ -14,16 +14,14 @@ import { useBooks } from '@/context/BookContext';
 import { Input } from '@/components/ui/input';
 import { chatAboutBook } from '@/ai/flows/chat-about-book';
 
-// A placeholder for the PDF viewer component
 function PdfViewer({ url }: { url: string }) {
-  // The <object> tag is generally more reliable for embedding PDF data URIs.
   return (
     <Card className="mt-8">
       <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2"><FileText /> Book Preview</CardTitle>
+        <CardTitle className="font-headline flex items-center gap-2"><FileText /> PDF Viewer</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="w-full aspect-[4/5] bg-muted rounded-md">
+        <div className="w-full h-[800px] bg-muted rounded-md">
             <object
                 data={url}
                 type="application/pdf"
