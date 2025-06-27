@@ -23,6 +23,7 @@ import { useUsers } from "@/context/UserContext";
 const uploadBookSchema = z.object({
   bookTitle: z.string().min(3, "Title must be at least 3 characters"),
   bookAuthor: z.string().min(3, "Author must be at least 3 characters"),
+  year: z.coerce.number().min(1000, "Please enter a valid year").max(new Date().getFullYear(), "Year cannot be in the future"),
   bookDescription: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
   pdfFile: z.any().refine(files => files?.length > 0, "A PDF file is required."),
@@ -193,6 +194,7 @@ function UploadBookForm() {
       bookAuthor: "",
       bookDescription: "",
       category: "",
+      year: undefined,
     },
   });
 
@@ -209,6 +211,7 @@ function UploadBookForm() {
             id: (Math.random() * 1000).toString(),
             title: values.bookTitle,
             author: values.bookAuthor,
+            year: values.year,
             description: values.bookDescription,
             category: values.category,
             imageUrl: "https://placehold.co/400x600/3F51B5/E8EAF6",
@@ -266,6 +269,17 @@ function UploadBookForm() {
                 <FormItem>
                   <FormLabel>Author</FormLabel>
                   <FormControl><Input placeholder="Thomas H. Cormen" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Publication Year</FormLabel>
+                  <FormControl><Input type="number" placeholder={`e.g. ${new Date().getFullYear()}`} {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}

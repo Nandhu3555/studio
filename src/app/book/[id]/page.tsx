@@ -115,7 +115,7 @@ export default function BookDetailPage() {
         <div className="md:col-span-2">
             <Badge variant="secondary" className="mb-2">{book.category}</Badge>
             <h1 className="text-4xl font-bold font-headline text-primary">{book.title}</h1>
-            <p className="text-xl text-muted-foreground mt-1">by {book.author}</p>
+            <p className="text-xl text-muted-foreground mt-1">by {book.author} ({book.year})</p>
             
             <Card className="my-6">
                 <CardHeader>

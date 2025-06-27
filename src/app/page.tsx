@@ -99,7 +99,7 @@ function BookCard({ book }: { book: Book }) {
             {book.title}
           </Link>
         </CardTitle>
-        <p className="text-sm text-muted-foreground">by {book.author}</p>
+        <p className="text-sm text-muted-foreground">by {book.author} ({book.year})</p>
       </CardContent>
       <CardFooter className="p-4 pt-0 mt-auto flex justify-between items-center">
         <div className="flex gap-4">
