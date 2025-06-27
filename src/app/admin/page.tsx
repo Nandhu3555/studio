@@ -118,7 +118,7 @@ function UploadBookForm({ onBookAdded }: { onBookAdded: (book: Book) => void }) 
             data_ai_hint: "book cover",
             likes: 0,
             dislikes: 0,
-            pdfUrl: "/sample.pdf",
+            pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
             summary: summaryResult.summary
         };
         onBookAdded(newBook);
