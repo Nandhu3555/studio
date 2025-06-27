@@ -19,11 +19,11 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<string[]>(() => {
     try {
       if (typeof window !== 'undefined') {
-        const storedCategories = sessionStorage.getItem(CATEGORIES_STORAGE_KEY);
+        const storedCategories = localStorage.getItem(CATEGORIES_STORAGE_KEY);
         return storedCategories ? JSON.parse(storedCategories) : initialCategories;
       }
     } catch (error) {
-      console.error("Could not access session storage for categories:", error);
+      console.error("Could not access local storage for categories:", error);
     }
     return initialCategories;
   });
@@ -32,9 +32,9 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+      localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
     } catch (error) {
-      console.error("Could not write to session storage for categories:", error);
+      console.error("Could not write to local storage for categories:", error);
     }
   }, [categories]);
 

@@ -23,15 +23,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const loggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-      const admin = sessionStorage.getItem('isAdmin') === 'true';
-      const storedUser = sessionStorage.getItem('user');
+      const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const admin = localStorage.getItem('isAdmin') === 'true';
+      const storedUser = localStorage.getItem('user');
       
       setIsLoggedIn(loggedIn);
       setIsAdmin(admin);
       setUser(storedUser ? JSON.parse(storedUser) : null);
     } catch (error) {
-        console.error("Could not access session storage for auth:", error);
+        console.error("Could not access local storage for auth:", error);
     } finally {
         setIsAuthReady(true);
     }
@@ -44,11 +44,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
     
     try {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('isAdmin', role === 'admin' ? 'true' : 'false');
-        sessionStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('isAdmin', role === 'admin' ? 'true' : 'false');
+        localStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
-        console.error("Could not access session storage:", error);
+        console.error("Could not access local storage:", error);
     }
   };
 
@@ -58,11 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     
     try {
-        sessionStorage.removeItem('isLoggedIn');
-        sessionStorage.removeItem('isAdmin');
-        sessionStorage.removeItem('user');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('user');
     } catch (error) {
-        console.error("Could not access session storage:", error);
+        console.error("Could not access local storage:", error);
     }
     
     router.push('/login');

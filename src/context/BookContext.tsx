@@ -19,11 +19,11 @@ export function BookProvider({ children }: { children: ReactNode }) {
   const [books, setBooks] = useState<Book[]>(() => {
     try {
       if (typeof window !== 'undefined') {
-        const storedBooks = sessionStorage.getItem(BOOKS_STORAGE_KEY);
+        const storedBooks = localStorage.getItem(BOOKS_STORAGE_KEY);
         return storedBooks ? JSON.parse(storedBooks) : initialBooks;
       }
     } catch (error) {
-      console.error("Could not access session storage for books:", error);
+      console.error("Could not access local storage for books:", error);
     }
     return initialBooks;
   });
@@ -32,9 +32,9 @@ export function BookProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
+      localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
     } catch (error) {
-      console.error("Could not write to session storage for books:", error);
+      console.error("Could not write to local storage for books:", error);
     }
   }, [books]);
 
