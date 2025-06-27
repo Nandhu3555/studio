@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import { AuthProvider } from '@/context/AuthContext';
 import { BookProvider } from '@/context/BookContext';
 import { UserProvider } from '@/context/UserContext';
+import { CategoryProvider } from '@/context/CategoryContext';
 
 export const metadata: Metadata = {
   title: 'B-Tech Lib',
@@ -27,9 +28,11 @@ export default function RootLayout({
         <AuthProvider>
           <UserProvider>
             <BookProvider>
-              <Header />
-              <main>{children}</main>
-              <Toaster />
+              <CategoryProvider>
+                <Header />
+                <main>{children}</main>
+                <Toaster />
+              </CategoryProvider>
             </BookProvider>
           </UserProvider>
         </AuthProvider>

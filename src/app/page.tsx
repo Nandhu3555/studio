@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { categories, type Book } from "@/lib/mock-data";
+import { type Book } from "@/lib/mock-data";
 import { useBooks } from "@/context/BookContext";
+import { useCategories } from "@/context/CategoryContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const { books } = useBooks();
+  const { categories } = useCategories();
 
   const filteredBooks = books
     .filter((book) => activeCategory === "All" || book.category === activeCategory)

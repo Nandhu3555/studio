@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { generateBookSummary } from "@/ai/flows/generate-book-summary";
-import { categories as bookCategories, recentActivity, type Activity, type Book } from "@/lib/mock-data";
+import { recentActivity, type Activity, type Book } from "@/lib/mock-data";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,9 +16,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, UploadCloud, Users, BookOpen, FolderKanban, Download, UserPlus, Bookmark } from "lucide-react";
+import { Loader2, Trash2, UploadCloud, Users, BookOpen, FolderKanban, Download, UserPlus, Bookmark, PlusCircle } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
 import { useUsers } from "@/context/UserContext";
+import { useCategories } from "@/context/CategoryContext";
 
 const uploadBookSchema = z.object({
   bookTitle: z.string().min(3, "Title must be at least 3 characters"),
@@ -29,6 +30,11 @@ const uploadBookSchema = z.object({
   pdfFile: z.any().refine(files => files?.length > 0, "A PDF file is required."),
 });
 type UploadBookValues = z.infer<typeof uploadBookSchema>;
+
+const addCategorySchema = z.object({
+    categoryName: z.string().min(3, "Category name must be at least 3 characters"),
+});
+type AddCategoryValues = z.infer<typeof addCategorySchema>;
 
 
 export default function AdminPage() {
@@ -103,9 +109,10 @@ const getActivityText = (activity: Activity) => {
 };
 
 function AdminDashboard() {
-  const { books, deleteBook } = useBooks();
+  const { books } = useBooks();
   const { users } = useUsers();
-  const totalCategories = bookCategories.filter(c => c !== "All").length;
+  const { categories } = useCategories();
+  const totalCategories = categories.filter(c => c !== "All").length;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -123,37 +130,10 @@ function AdminDashboard() {
         <div className="grid lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2 space-y-8">
                 <UploadBookForm />
-                <Card>
-                    <CardHeader>
-                    <CardTitle className="font-headline">Manage Books</CardTitle>
-                    <CardDescription>View and delete existing books from the library.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                    <Table>
-                        <TableHeader>
-                        <TableRow>
-                            <TableHead>Title</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {books.map(book => (
-                            <TableRow key={book.id}>
-                            <TableCell className="font-medium">{book.title}</TableCell>
-                            <TableCell>{book.category}</TableCell>
-                            <TableCell className="text-right">
-                                <Button variant="ghost" size="icon" onClick={() => deleteBook(book.id)}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                                <span className="sr-only">Delete</span>
-                                </Button>
-                            </TableCell>
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
-                    </CardContent>
-                </Card>
+                 <div className="grid md:grid-cols-2 gap-8">
+                    <ManageBooksCard />
+                    <ManageCategoriesCard />
+                 </div>
             </div>
             <div className="lg:col-span-1">
                 <Card>
@@ -184,6 +164,7 @@ function AdminDashboard() {
 
 function UploadBookForm() {
   const { addBook } = useBooks();
+  const { categories } = useCategories();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -308,7 +289,7 @@ function UploadBookForm() {
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                            {bookCategories.filter(c => c !== "All").map(cat => (
+                            {categories.filter(c => c !== "All").map(cat => (
                                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                             ))}
                         </SelectContent>
@@ -345,4 +326,103 @@ function UploadBookForm() {
       </CardContent>
     </Card>
   );
+}
+
+function ManageBooksCard() {
+    const { books, deleteBook } = useBooks();
+    return (
+        <Card>
+            <CardHeader>
+            <CardTitle className="font-headline">Manage Books</CardTitle>
+            <CardDescription>View and delete existing books.</CardDescription>
+            </CardHeader>
+            <CardContent>
+            <Table>
+                <TableHeader>
+                <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+                </TableHeader>
+                <TableBody>
+                {books.map(book => (
+                    <TableRow key={book.id}>
+                    <TableCell className="font-medium">{book.title}</TableCell>
+                    <TableCell>{book.category}</TableCell>
+                    <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => deleteBook(book.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <span className="sr-only">Delete</span>
+                        </Button>
+                    </TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+            </CardContent>
+        </Card>
+    );
+}
+
+function ManageCategoriesCard() {
+    const { categories, addCategory, deleteCategory } = useCategories();
+    const form = useForm<AddCategoryValues>({
+        resolver: zodResolver(addCategorySchema),
+        defaultValues: { categoryName: "" },
+    });
+
+    function onSubmit(values: AddCategoryValues) {
+        addCategory(values.categoryName);
+        form.reset();
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline">Manage Categories</CardTitle>
+                <CardDescription>Add or delete book categories.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-start gap-2 mb-4">
+                        <FormField
+                            control={form.control}
+                            name="categoryName"
+                            render={({ field }) => (
+                                <FormItem className="flex-grow">
+                                    <FormControl><Input placeholder="New category name..." {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" size="icon" aria-label="Add category">
+                            <PlusCircle className="h-5 w-5" />
+                        </Button>
+                    </form>
+                </Form>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Category Name</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {categories.filter(c => c !== "All").map(category => (
+                            <TableRow key={category}>
+                                <TableCell className="font-medium">{category}</TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="ghost" size="icon" onClick={() => deleteCategory(category)}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                        <span className="sr-only">Delete</span>
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
 }
