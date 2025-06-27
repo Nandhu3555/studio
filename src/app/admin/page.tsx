@@ -216,6 +216,10 @@ function UploadBookForm() {
           likes: 0,
           dislikes: 0,
           pdfUrl: pdfUrl,
+          rating: parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
+          language: "English",
+          pages: Math.floor(Math.random() * 300) + 200,
+          publisher: "Tech Books Inc.",
       };
       addBook(newBook);
       toast({

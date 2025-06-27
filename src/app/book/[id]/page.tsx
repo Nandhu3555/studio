@@ -14,7 +14,13 @@ import { useToast } from '@/hooks/use-toast';
 
 
 function StarRating({ rating }: { rating: number }) {
-  const fullStars = Math.round(rating);
+  // Guard against invalid rating values that could cause a crash.
+  if (typeof rating !== 'number' || isNaN(rating)) {
+    // Don't render anything if the rating is invalid.
+    return null;
+  }
+  
+  const fullStars = Math.min(5, Math.max(0, Math.round(rating)));
   const emptyStars = 5 - fullStars;
 
   return (
@@ -49,8 +55,10 @@ export default function BookDetailPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const foundBook = findBookById(bookId) || null;
-    setBook(foundBook);
+    if (bookId) {
+      const foundBook = findBookById(bookId) || null;
+      setBook(foundBook);
+    }
   }, [bookId, findBookById]);
 
   const handleShare = async () => {
@@ -101,7 +109,7 @@ export default function BookDetailPage() {
                 <ArrowLeft className="h-5 w-5" />
                 <span className="sr-only">Back</span>
             </Button>
-            <h1 className="text-lg font-semibold font-headline">Book Details</h1>
+            <h1 className="text-lg font-semibold font-headline truncate px-2">{book.title}</h1>
             <Button variant="ghost" size="icon" onClick={() => setIsBookmarked(!isBookmarked)}>
                 <Bookmark className={`h-5 w-5 ${isBookmarked ? 'text-primary fill-primary' : ''}`} />
                 <span className="sr-only">Bookmark</span>
@@ -109,25 +117,24 @@ export default function BookDetailPage() {
         </div>
       </header>
       
-      <main className="p-4">
+      <main className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
         <div className="text-center space-y-2 mb-6">
-            <h2 className="text-2xl font-bold font-headline text-primary">{book.title}</h2>
-            <p className="text-md text-muted-foreground">by {book.author}</p>
+            <h2 className="text-3xl font-bold font-headline text-primary">{book.title}</h2>
+            <p className="text-lg text-muted-foreground">by {book.author}</p>
         </div>
 
         <div className="flex flex-col items-center justify-center space-y-4 mb-6">
             <Badge variant="secondary">{book.category}</Badge>
             <div className="flex items-center gap-4">
                 <StarRating rating={book.rating} />
-                <span className="text-sm font-semibold text-green-500">Free</span>
             </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <Button asChild size="lg">
-            <a href={book.pdfUrl} target="_blank" rel="noopener noreferrer">
-              <Download className="mr-2 h-4 w-4" /> Download
-            </a>
+            <Link href={`/book/${book.id}/read`}>
+              Read Book
+            </Link>
           </Button>
           <Button variant="outline" size="lg" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" /> Share
@@ -147,6 +154,7 @@ export default function BookDetailPage() {
                         <DetailRow label="Language" value={book.language} />
                         <DetailRow label="Pages" value={book.pages} />
                         <DetailRow label="Publisher" value={book.publisher} />
+                        <DetailRow label="Year" value={book.year} />
                      </dl>
                 </div>
             </CardContent>
