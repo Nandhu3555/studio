@@ -279,7 +279,7 @@ function UploadBookForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Publication Year</FormLabel>
-                  <FormControl><Input type="number" placeholder={`e.g. ${new Date().getFullYear()}`} {...field} /></FormControl>
+                  <FormControl><Input type="number" placeholder={`e.g. ${new Date().getFullYear()}`} {...field} value={field.value ?? ''} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
