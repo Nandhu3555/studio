@@ -7,10 +7,12 @@ import type { Book } from '@/lib/mock-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, FileText, ThumbsDown, ThumbsUp, Send, Mic, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBooks } from '@/context/BookContext';
+import { Input } from '@/components/ui/input';
+import { chatAboutBook } from '@/ai/flows/chat-about-book';
 
 // A placeholder for the PDF viewer component
 function PdfViewer({ url }: { url: string }) {
@@ -44,6 +46,90 @@ function PdfViewer({ url }: { url: string }) {
     </Card>
   )
 }
+
+function BookChat({ book }: { book: Book }) {
+  const [query, setQuery] = useState('');
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    setIsLoading(true);
+    setAnswer(null);
+    setError(null);
+
+    try {
+      const response = await chatAboutBook({
+        query,
+        bookTitle: book.title,
+        bookDescription: book.description,
+        bookSummary: book.summary,
+      });
+      setAnswer(response.answer);
+    } catch (err) {
+      console.error(err);
+      setError('Sorry, something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+      <Card className="my-6 bg-transparent shadow-none border-none">
+          <CardContent className="p-0">
+              <div className="text-center mb-6">
+                  <h2 className="text-3xl font-headline">What can I help with?</h2>
+              </div>
+              <form onSubmit={handleSubmit}>
+                  <div className="relative w-full max-w-3xl mx-auto">
+                      <Input
+                          placeholder="Ask anything about this book..."
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          className="w-full rounded-full py-6 pl-6 pr-28 text-base shadow-lg"
+                          disabled={isLoading}
+                      />
+                      <div className="absolute inset-y-0 right-3 flex items-center gap-1">
+                          <Button type="button" size="icon" variant="ghost" className="h-10 w-10 text-muted-foreground hover:text-foreground" disabled>
+                              <Mic className="h-5 w-5" />
+                          </Button>
+                          <Button type="submit" size="icon" variant="default" className="h-10 w-10 rounded-full" disabled={isLoading || !query.trim()}>
+                              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                          </Button>
+                      </div>
+                  </div>
+              </form>
+
+              {(isLoading || answer || error) && (
+                  <div className="max-w-3xl mx-auto mt-6">
+                      {isLoading && (
+                          <div className="flex items-center justify-center text-muted-foreground rounded-lg bg-card p-4 border">
+                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                              Thinking...
+                          </div>
+                      )}
+                      {error && (
+                          <div className="text-center text-destructive rounded-lg bg-card p-4 border border-destructive">
+                              {error}
+                          </div>
+                      )}
+                      {answer && (
+                          <Card>
+                              <CardContent className="p-6">
+                                  <p className="whitespace-pre-wrap">{answer}</p>
+                              </CardContent>
+                          </Card>
+                      )}
+                  </div>
+              )}
+          </CardContent>
+      </Card>
+  );
+}
+
 
 export default function BookDetailPage() {
   const params = useParams();
@@ -126,16 +212,7 @@ export default function BookDetailPage() {
                 </CardContent>
             </Card>
 
-            {book.summary && (
-                <Card className="my-6 bg-primary/5">
-                    <CardHeader>
-                        <CardTitle className="font-headline">AI-Generated Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-foreground/90 italic">{book.summary}</p>
-                    </CardContent>
-                </Card>
-            )}
+            <BookChat book={book} />
 
             <PdfViewer url={book.pdfUrl} />
         </div>
