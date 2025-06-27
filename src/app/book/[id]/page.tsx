@@ -7,7 +7,7 @@ import type { Book } from '@/lib/mock-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, ThumbsDown, ThumbsUp, Send, Mic, Loader2 } from 'lucide-react';
+import { ArrowLeft, FileText, ThumbsDown, ThumbsUp, Send, Mic, Loader2, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBooks } from '@/context/BookContext';
@@ -16,31 +16,32 @@ import { chatAboutBook } from '@/ai/flows/chat-about-book';
 
 // A placeholder for the PDF viewer component
 function PdfViewer({ url }: { url: string }) {
-  const [isLoading, setIsLoading] = useState(true);
-
+  // The <object> tag is generally more reliable for embedding PDF data URIs.
+  // We provide a fallback link for browsers that might not support it.
   return (
     <Card className="mt-8">
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2"><FileText /> Book Preview</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="w-full aspect-[4/5] bg-muted rounded-md flex items-center justify-center relative">
-          {isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
-              </div>
-              <p className="mt-4 text-sm text-muted-foreground animate-pulse">Rendering PDF...</p>
-            </div>
-          )}
-          <iframe
-            src={url}
-            className={`w-full h-full border-0 rounded-md transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-            title="Book PDF Preview"
-            onLoad={() => setIsLoading(false)}
-          ></iframe>
+        <div className="w-full aspect-[4/5] bg-muted rounded-md">
+            <object
+                data={url}
+                type="application/pdf"
+                width="100%"
+                height="100%"
+                className="rounded-md"
+            >
+                <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+                    <p className="text-muted-foreground mb-4">Your browser does not support embedded PDFs.</p>
+                    <Button asChild>
+                        <a href={url} download="book.pdf">
+                            <Download className="mr-2 h-4 w-4" />
+                            Download PDF
+                        </a>
+                    </Button>
+                </div>
+            </object>
         </div>
       </CardContent>
     </Card>
