@@ -1,6 +1,7 @@
 "use client"
 
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { type Book } from '@/lib/mock-data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
