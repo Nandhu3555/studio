@@ -24,11 +24,11 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-headline text-primary tracking-tighter">
-          Explore Our Digital Library
+        <h1 className="text-4xl md:text-6xl font-bold font-headline text-primary tracking-tight">
+          Your Digital Library
         </h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Find the books you need for your B.Tech studies. Browse by category or search for a specific title.
+        <p className="mt-6 text-lg text-muted-foreground max-w-3xl mx-auto">
+          Discover a world of knowledge. Find textbooks, references, and more for your B.Tech studies, all in one place.
         </p>
       </header>
 
@@ -80,7 +80,7 @@ function BookCard({ book }: { book: Book }) {
     <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
       <CardHeader className="p-0 relative">
         <Badge variant="secondary" className="absolute top-2 right-2 z-10">{book.category}</Badge>
-        <Link href={`/book/${book.id}`} className="block">
+        <Link href={`/book/${book.id}`} className="block overflow-hidden">
           <Image
             src={book.imageUrl}
             alt={`Cover of ${book.title}`}
@@ -99,24 +99,24 @@ function BookCard({ book }: { book: Book }) {
         </CardTitle>
         <p className="text-sm text-muted-foreground">by {book.author}</p>
       </CardContent>
-      <CardFooter className="p-4 bg-muted/50 flex justify-between items-center">
+      <CardFooter className="p-4 pt-0 mt-auto flex justify-between items-center">
         <div className="flex gap-4">
           <div className="flex items-center gap-1 text-sm">
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-500 hover:bg-green-500/10" onClick={() => setLikes(l => l + 1)}>
+            <Button size="icon" variant="ghost" className="h-8 w-8 text-like hover:bg-like/10" onClick={() => setLikes(l => l + 1)}>
               <ThumbsUp className="h-4 w-4" />
             </Button>
-            <span>{likes}</span>
+            <span className="text-muted-foreground">{likes}</span>
           </div>
           <div className="flex items-center gap-1 text-sm">
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:bg-red-500/10" onClick={() => setDislikes(d => d + 1)}>
+            <Button size="icon" variant="ghost" className="h-8 w-8 text-dislike hover:bg-dislike/10" onClick={() => setDislikes(d => d + 1)}>
               <ThumbsDown className="h-4 w-4" />
             </Button>
-            <span>{dislikes}</span>
+            <span className="text-muted-foreground">{dislikes}</span>
           </div>
         </div>
         <Button asChild size="sm" variant="ghost">
           <Link href={`/book/${book.id}`}>
-            Read <ArrowRight className="ml-2 h-4 w-4" />
+            Details <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
       </CardFooter>

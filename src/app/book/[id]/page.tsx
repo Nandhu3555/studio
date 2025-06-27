@@ -98,11 +98,11 @@ export default function BookDetailPage() {
             </Card>
             <Card>
                 <CardContent className="p-4 flex justify-around items-center">
-                    <div className="flex items-center gap-2 text-lg font-semibold text-green-500">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-like">
                         <ThumbsUp />
                         <span>{book.likes}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-lg font-semibold text-red-500">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-dislike">
                         <ThumbsDown />
                         <span>{book.dislikes}</span>
                     </div>
