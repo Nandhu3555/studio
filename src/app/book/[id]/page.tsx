@@ -6,7 +6,7 @@ import { type Book } from '@/lib/mock-data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bookmark, Download, Share2, Star } from 'lucide-react';
+import { ArrowLeft, Bookmark, Share2, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBooks } from '@/context/BookContext';
@@ -62,6 +62,11 @@ export default function BookDetailPage() {
     }
   }, [bookId, findBookById]);
 
+  const fallbackShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({ title: "Link Copied!", description: "The link to this book has been copied to your clipboard." });
+  };
+
   const handleShare = async () => {
     if (navigator.share && book) {
       try {
@@ -71,11 +76,12 @@ export default function BookDetailPage() {
           url: window.location.href,
         });
       } catch (error) {
-        console.error('Error sharing:', error);
+        console.error('Share failed:', error);
+        // Fallback to copying the link if the user denies permission or an error occurs
+        fallbackShare();
       }
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({ title: "Link Copied!", description: "The link to this book has been copied to your clipboard." });
+      fallbackShare();
     }
   };
 
