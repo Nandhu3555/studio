@@ -16,33 +16,34 @@ import { chatAboutBook } from '@/ai/flows/chat-about-book';
 
 function PdfViewer({ url }: { url:string }) {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // This will hold the created object URL
     let newObjectUrl: string | null = null;
+    setError(null);
 
     const setupPdf = async () => {
-      // Only process data URIs
       if (url && url.startsWith('data:application/pdf')) {
         try {
-          // fetch is a convenient way to convert data URI to a blob
           const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error('Failed to fetch PDF data.');
+          }
           const blob = await response.blob();
           newObjectUrl = URL.createObjectURL(blob);
           setObjectUrl(newObjectUrl);
-        } catch (error) {
-          console.error("Error creating object URL for PDF:", error);
-          setObjectUrl(null); // Fallback on error
+        } catch (err) {
+          console.error("Error creating object URL for PDF:", err);
+          setError("Could not load the PDF preview. This can happen if the file is too large or the browser has strict security settings. Please try a different browser.");
+          setObjectUrl(null);
         }
       } else {
-        // For regular URLs (like the initial dummy pdf), use them directly
         setObjectUrl(url);
       }
     };
 
     setupPdf();
 
-    // Cleanup function to revoke the object URL and prevent memory leaks
     return () => {
       if (newObjectUrl) {
         URL.revokeObjectURL(newObjectUrl);
@@ -50,22 +51,37 @@ function PdfViewer({ url }: { url:string }) {
     };
   }, [url]);
 
-  // Display a loading indicator while the PDF is being processed
-  if (!objectUrl) {
+  const renderContent = () => {
+    if (error) {
+      return (
+        <div className="w-full h-[800px] bg-muted rounded-md flex flex-col items-center justify-center text-center p-4">
+            <p className="text-destructive font-semibold">PDF Preview Error</p>
+            <p className="text-muted-foreground mt-2">{error}</p>
+        </div>
+      );
+    }
+    
+    if (!objectUrl) {
+      return (
+        <div className="w-full h-[800px] bg-muted rounded-md flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="ml-2 text-muted-foreground">Loading PDF...</p>
+        </div>
+      );
+    }
+
     return (
-        <Card className="mt-8">
-            <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2"><FileText /> PDF Viewer</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="w-full h-[800px] bg-muted rounded-md flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="ml-2 text-muted-foreground">Loading PDF...</p>
-                </div>
-            </CardContent>
-        </Card>
+      <div className="w-full h-[800px] bg-muted rounded-md">
+          <embed
+              src={objectUrl}
+              type="application/pdf"
+              width="100%"
+              height="100%"
+              className="rounded-md"
+          />
+      </div>
     );
-  }
+  };
 
   return (
     <Card className="mt-8">
@@ -73,17 +89,7 @@ function PdfViewer({ url }: { url:string }) {
         <CardTitle className="font-headline flex items-center gap-2"><FileText /> PDF Viewer</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-[800px] bg-muted rounded-md">
-            <iframe
-                src={objectUrl}
-                title="PDF Viewer"
-                width="100%"
-                height="100%"
-                className="rounded-md"
-            >
-                <p>Your browser does not support embedded PDFs. Please try a different browser to read the book.</p>
-            </iframe>
-        </div>
+        {renderContent()}
       </CardContent>
     </Card>
   )
@@ -108,7 +114,6 @@ function BookChat({ book }: { book: Book }) {
         query,
         bookTitle: book.title,
         bookDescription: book.description,
-        bookSummary: book.summary,
       });
       setAnswer(response.answer);
     } catch (err) {
