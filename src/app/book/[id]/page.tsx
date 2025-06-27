@@ -1,269 +1,157 @@
 "use client"
 
-import { useParams } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import type { Book } from '@/lib/mock-data';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useParams, useRouter } from 'next/navigation';
+import { type Book } from '@/lib/mock-data';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, ThumbsDown, ThumbsUp, Send, Mic, Loader2 } from 'lucide-react';
+import { ArrowLeft, Bookmark, Download, Share2, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBooks } from '@/context/BookContext';
-import { Input } from '@/components/ui/input';
-import { chatAboutBook } from '@/ai/flows/chat-about-book';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
-function PdfViewer({ url }: { url:string }) {
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let newObjectUrl: string | null = null;
-    setError(null);
-
-    const setupPdf = async () => {
-      if (url && url.startsWith('data:application/pdf')) {
-        try {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error('Failed to fetch PDF data.');
-          }
-          const blob = await response.blob();
-          newObjectUrl = URL.createObjectURL(blob);
-          setObjectUrl(newObjectUrl);
-        } catch (err) {
-          console.error("Error creating object URL for PDF:", err);
-          setError("Could not load the PDF preview. This can happen if the file is too large or the browser has strict security settings. Please try a different browser.");
-          setObjectUrl(null);
-        }
-      } else {
-        setObjectUrl(url);
-      }
-    };
-
-    setupPdf();
-
-    return () => {
-      if (newObjectUrl) {
-        URL.revokeObjectURL(newObjectUrl);
-      }
-    };
-  }, [url]);
-
-  const renderContent = () => {
-    if (error) {
-      return (
-        <div className="w-full h-[800px] bg-muted rounded-md flex flex-col items-center justify-center text-center p-4">
-            <p className="text-destructive font-semibold">PDF Preview Error</p>
-            <p className="text-muted-foreground mt-2">{error}</p>
-        </div>
-      );
-    }
-    
-    if (!objectUrl) {
-      return (
-        <div className="w-full h-[800px] bg-muted rounded-md flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="ml-2 text-muted-foreground">Loading PDF...</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="w-full h-[800px] bg-muted rounded-md">
-          <embed
-              src={objectUrl}
-              type="application/pdf"
-              width="100%"
-              height="100%"
-              className="rounded-md"
-          />
-      </div>
-    );
-  };
+function StarRating({ rating }: { rating: number }) {
+  const fullStars = Math.round(rating);
+  const emptyStars = 5 - fullStars;
 
   return (
-    <Card className="mt-8">
-      <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2"><FileText /> PDF Viewer</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {renderContent()}
-      </CardContent>
-    </Card>
-  )
-}
-
-function BookChat({ book }: { book: Book }) {
-  const [query, setQuery] = useState('');
-  const [answer, setAnswer] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-
-    setIsLoading(true);
-    setAnswer(null);
-    setError(null);
-
-    try {
-      const response = await chatAboutBook({
-        query,
-        bookTitle: book.title,
-        bookDescription: book.description,
-      });
-      setAnswer(response.answer);
-    } catch (err) {
-      console.error(err);
-      setError('Sorry, something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-      <Card className="my-6 bg-transparent shadow-none border-none">
-          <CardContent className="p-0">
-              <div className="text-center mb-6">
-                  <h2 className="text-3xl font-headline">What can I help with?</h2>
-              </div>
-              <form onSubmit={handleSubmit}>
-                  <div className="relative w-full max-w-3xl mx-auto">
-                      <Input
-                          placeholder="Ask anything about this book..."
-                          value={query}
-                          onChange={(e) => setQuery(e.target.value)}
-                          className="w-full rounded-full py-6 pl-6 pr-28 text-base shadow-lg"
-                          disabled={isLoading}
-                      />
-                      <div className="absolute inset-y-0 right-3 flex items-center gap-1">
-                          <Button type="button" size="icon" variant="ghost" className="h-10 w-10 text-muted-foreground hover:text-foreground" disabled>
-                              <Mic className="h-5 w-5" />
-                          </Button>
-                          <Button type="submit" size="icon" variant="default" className="h-10 w-10 rounded-full" disabled={isLoading || !query.trim()}>
-                              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                          </Button>
-                      </div>
-                  </div>
-              </form>
-
-              {(isLoading || answer || error) && (
-                  <div className="max-w-3xl mx-auto mt-6">
-                      {isLoading && (
-                          <div className="flex items-center justify-center text-muted-foreground rounded-lg bg-card p-4 border">
-                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                              Thinking...
-                          </div>
-                      )}
-                      {error && (
-                          <div className="text-center text-destructive rounded-lg bg-card p-4 border border-destructive">
-                              {error}
-                          </div>
-                      )}
-                      {answer && (
-                          <Card>
-                              <CardContent className="p-6">
-                                  <p className="whitespace-pre-wrap">{answer}</p>
-                              </CardContent>
-                          </Card>
-                      )}
-                  </div>
-              )}
-          </CardContent>
-      </Card>
+    <div className="flex items-center gap-1">
+      {[...Array(fullStars)].map((_, i) => (
+        <Star key={`full-${i}`} className="h-5 w-5 text-primary fill-primary" />
+      ))}
+      {[...Array(emptyStars)].map((_, i) => (
+        <Star key={`empty-${i}`} className="h-5 w-5 text-muted-foreground/30" />
+      ))}
+      <span className="ml-2 text-sm font-medium text-muted-foreground">{rating.toFixed(1)}</span>
+    </div>
   );
 }
 
+function DetailRow({ label, value }: { label: string, value: string | number }) {
+    return (
+        <div className="flex justify-between py-2">
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd className="font-medium text-foreground">{value}</dd>
+        </div>
+    );
+}
 
 export default function BookDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const bookId = params.id as string;
   const [book, setBook] = useState<Book | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const { findBookById } = useBooks();
+  const { toast } = useToast();
 
   useEffect(() => {
     const foundBook = findBookById(bookId) || null;
     setBook(foundBook);
   }, [bookId, findBookById]);
 
+  const handleShare = async () => {
+    if (navigator.share && book) {
+      try {
+        await navigator.share({
+          title: book.title,
+          text: `Check out this book: ${book.title} by ${book.author}`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({ title: "Link Copied!", description: "The link to this book has been copied to your clipboard." });
+    }
+  };
+
   if (!book) {
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="grid md:grid-cols-3 gap-8">
-                <div className="md:col-span-1">
-                    <Skeleton className="w-full aspect-[2/3] rounded-lg" />
-                    <Skeleton className="h-10 w-full mt-4" />
+        <div className="bg-background min-h-screen">
+             <div className="flex items-center justify-between p-4 border-b">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+            </div>
+            <div className="p-4 space-y-4">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-5 w-1/2" />
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-6 w-32" />
+                <div className="flex gap-4">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
                 </div>
-                <div className="md:col-span-2">
-                    <Skeleton className="h-12 w-3/4 mb-2" />
-                    <Skeleton className="h-6 w-1/2 mb-6" />
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-5/6" />
-                </div>
+                <Skeleton className="h-64 w-full" />
             </div>
         </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Button asChild variant="outline" size="sm" className="mb-6">
-        <Link href="/">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Library
-        </Link>
-      </Button>
-
-      <div className="grid md:grid-cols-3 gap-8 items-start">
-        <div className="md:col-span-1 flex flex-col gap-4">
-            <Card className="overflow-hidden">
-                <Image
-                    src={book.imageUrl}
-                    alt={`Cover of ${book.title}`}
-                    width={400}
-                    height={600}
-                    className="w-full h-auto object-cover"
-                    data-ai-hint={book.data_ai_hint}
-                    priority
-                />
-            </Card>
-            <Card>
-                <CardContent className="p-4 flex justify-around items-center">
-                    <div className="flex items-center gap-2 text-lg font-semibold text-like">
-                        <ThumbsUp />
-                        <span>{book.likes}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-lg font-semibold text-dislike">
-                        <ThumbsDown />
-                        <span>{book.dislikes}</span>
-                    </div>
-                </CardContent>
-            </Card>
+    <div className="bg-background min-h-screen">
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between p-4 border-b">
+            <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <ArrowLeft className="h-5 w-5" />
+                <span className="sr-only">Back</span>
+            </Button>
+            <h1 className="text-lg font-semibold font-headline">Book Details</h1>
+            <Button variant="ghost" size="icon" onClick={() => setIsBookmarked(!isBookmarked)}>
+                <Bookmark className={`h-5 w-5 ${isBookmarked ? 'text-primary fill-primary' : ''}`} />
+                <span className="sr-only">Bookmark</span>
+            </Button>
+        </div>
+      </header>
+      
+      <main className="p-4">
+        <div className="text-center space-y-2 mb-6">
+            <h2 className="text-2xl font-bold font-headline text-primary">{book.title}</h2>
+            <p className="text-md text-muted-foreground">by {book.author}</p>
         </div>
 
-        <div className="md:col-span-2">
-            <Badge variant="secondary" className="mb-2">{book.category}</Badge>
-            <h1 className="text-4xl font-bold font-headline text-primary">{book.title}</h1>
-            <p className="text-xl text-muted-foreground mt-1">by {book.author} ({book.year})</p>
-            
-            <Card className="my-6">
-                <CardHeader>
-                    <CardTitle className="font-headline">Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-foreground/80">{book.description}</p>
-                </CardContent>
-            </Card>
-
-            <BookChat book={book} />
-
-            <PdfViewer url={book.pdfUrl} />
+        <div className="flex flex-col items-center justify-center space-y-4 mb-6">
+            <Badge variant="secondary">{book.category}</Badge>
+            <div className="flex items-center gap-4">
+                <StarRating rating={book.rating} />
+                <span className="text-sm font-semibold text-green-500">Free</span>
+            </div>
         </div>
-      </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Button asChild size="lg">
+            <a href={book.pdfUrl} target="_blank" rel="noopener noreferrer">
+              <Download className="mr-2 h-4 w-4" /> Download
+            </a>
+          </Button>
+          <Button variant="outline" size="lg" onClick={handleShare}>
+            <Share2 className="mr-2 h-4 w-4" /> Share
+          </Button>
+        </div>
+        
+        <Card>
+            <CardContent className="p-6 space-y-6">
+                <div>
+                    <h3 className="text-lg font-semibold font-headline mb-2">Description</h3>
+                    <p className="text-foreground/80 text-sm leading-relaxed">{book.description}</p>
+                </div>
+                <Separator />
+                <div>
+                     <h3 className="text-lg font-semibold font-headline mb-2">Details</h3>
+                     <dl>
+                        <DetailRow label="Language" value={book.language} />
+                        <DetailRow label="Pages" value={book.pages} />
+                        <DetailRow label="Publisher" value={book.publisher} />
+                     </dl>
+                </div>
+            </CardContent>
+        </Card>
+      </main>
     </div>
   );
 }
