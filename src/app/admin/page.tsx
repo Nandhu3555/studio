@@ -4,7 +4,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { generateBookSummary } from "@/ai/flows/generate-book-summary";
 import { recentActivity, type Activity, type Book } from "@/lib/mock-data";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -200,39 +199,30 @@ function UploadBookForm() {
   async function onSubmit(values: UploadBookValues) {
     setLoading(true);
     try {
-      const [imageUrl, pdfUrl, summaryResult] = await Promise.all([
+      const [imageUrl, pdfUrl] = await Promise.all([
         fileToDataUrl(values.imageFile[0]),
         fileToDataUrl(values.pdfFile[0]),
-        generateBookSummary({
-          bookTitle: values.bookTitle,
-          bookDescription: values.bookDescription,
-        }),
       ]);
 
-      if (summaryResult?.summary) {
-        const newBook: Book = {
-            id: (Math.random() * 1000).toString(),
-            title: values.bookTitle,
-            author: values.bookAuthor,
-            year: values.year,
-            description: values.bookDescription,
-            category: values.category,
-            imageUrl: imageUrl,
-            data_ai_hint: "",
-            likes: 0,
-            dislikes: 0,
-            pdfUrl: pdfUrl,
-            summary: summaryResult.summary
-        };
-        addBook(newBook);
-        toast({
-          title: "Book Uploaded Successfully!",
-          description: `"${values.bookTitle}" has been added with an AI-generated summary.`,
-        });
-        form.reset();
-      } else {
-        throw new Error("Failed to generate summary.");
-      }
+      const newBook: Book = {
+          id: (Math.random() * 1000).toString(),
+          title: values.bookTitle,
+          author: values.bookAuthor,
+          year: values.year,
+          description: values.bookDescription,
+          category: values.category,
+          imageUrl: imageUrl,
+          data_ai_hint: "",
+          likes: 0,
+          dislikes: 0,
+          pdfUrl: pdfUrl,
+      };
+      addBook(newBook);
+      toast({
+        title: "Book Uploaded Successfully!",
+        description: `"${values.bookTitle}" has been added to the library.`,
+      });
+      form.reset();
     } catch (error) {
       console.error(error);
       toast({
@@ -249,7 +239,7 @@ function UploadBookForm() {
     <Card>
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2"><UploadCloud /> Upload New Book</CardTitle>
-        <CardDescription>Fill in the details to add a new book and generate its summary.</CardDescription>
+        <CardDescription>Fill in the details to add a new book to the library.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -350,7 +340,7 @@ function UploadBookForm() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating & Uploading...
+                  Uploading...
                 </>
               ) : (
                 "Upload Book"
