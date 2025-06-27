@@ -74,17 +74,15 @@ function PdfViewer({ url }: { url:string }) {
       </CardHeader>
       <CardContent>
         <div className="w-full h-[800px] bg-muted rounded-md">
-            <object
-                data={objectUrl}
-                type="application/pdf"
+            <iframe
+                src={objectUrl}
+                title="PDF Viewer"
                 width="100%"
                 height="100%"
                 className="rounded-md"
             >
-                <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-                    <p className="text-muted-foreground">This browser does not support embedded PDFs. Please try a different browser to read the book.</p>
-                </div>
-            </object>
+                <p>Your browser does not support embedded PDFs. Please try a different browser to read the book.</p>
+            </iframe>
         </div>
       </CardContent>
     </Card>
