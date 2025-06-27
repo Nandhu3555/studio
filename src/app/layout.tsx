@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/Header';
 import { AuthProvider } from '@/context/AuthContext';
 import { BookProvider } from '@/context/BookContext';
+import { UserProvider } from '@/context/UserContext';
 
 export const metadata: Metadata = {
   title: 'B-Tech Lib',
@@ -24,11 +25,13 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
-          <BookProvider>
-            <Header />
-            <main>{children}</main>
-            <Toaster />
-          </BookProvider>
+          <UserProvider>
+            <BookProvider>
+              <Header />
+              <main>{children}</main>
+              <Toaster />
+            </BookProvider>
+          </UserProvider>
         </AuthProvider>
       </body>
     </html>

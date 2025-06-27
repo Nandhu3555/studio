@@ -12,6 +12,21 @@ export type Book = {
   summary?: string;
 };
 
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: Date;
+};
+
+export type Activity = {
+    id: string;
+    type: 'new_user' | 'download' | 'bookmark';
+    user: string;
+    book?: string;
+    timestamp: Date;
+};
+
 export const categories = [
   "All",
   "Computer Science",
@@ -20,6 +35,19 @@ export const categories = [
   "Civil",
   "Mathematics",
 ];
+
+export const users: User[] = [
+    { id: '1', name: 'John Doe', email: 'john.d@example.com', createdAt: new Date('2024-07-26T10:00:00Z') },
+    { id: '2', name: 'Emily Davis', email: 'emily.d@example.com', createdAt: new Date('2024-07-28T14:30:00Z') },
+    { id: '3', name: 'Jane Smith', email: 'jane.s@example.com', createdAt: new Date('2024-07-29T09:00:00Z') },
+];
+
+export const recentActivity: Activity[] = [
+    { id: '1', type: 'download', user: 'John Doe', book: 'Data Structures & Algorithms', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+    { id: '2', type: 'new_user', user: 'Emily Davis', timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000) },
+    { id: '3', type: 'bookmark', user: 'Jane Smith', book: 'Digital Electronics', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+];
+
 
 export const books: Book[] = [
   {
