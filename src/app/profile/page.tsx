@@ -1,16 +1,36 @@
+"use client";
+
+import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function ProfilePage() {
-  // Mock user data
-  const user = {
-    name: "B.Tech Student",
-    email: "student@university.edu",
-    initials: "BS",
-    avatarUrl: "https://placehold.co/100x100/7E57C2/FFFFFF"
-  };
+    const { user, isLoggedIn, isAdmin, logout } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            router.replace('/login');
+        }
+    }, [isLoggedIn, router]);
+
+    if (!user) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    const initials = user.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase();
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -18,8 +38,8 @@ export default function ProfilePage() {
         <Card className="w-full">
           <CardHeader className="flex flex-col items-center text-center">
             <Avatar className="h-24 w-24 mb-4">
-              <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="person portrait" />
-              <AvatarFallback className="text-3xl">{user.initials}</AvatarFallback>
+              <AvatarImage src={`https://placehold.co/100x100/7E57C2/FFFFFF?text=${initials}`} alt={user.name} data-ai-hint="person portrait" />
+              <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
             </Avatar>
             <CardTitle className="text-2xl font-headline">{user.name}</CardTitle>
             <CardDescription>{user.email}</CardDescription>
@@ -41,12 +61,12 @@ export default function ProfilePage() {
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-muted-foreground">Role</span>
-                            <span className="font-semibold text-primary">Student</span>
+                            <span className="font-semibold text-primary">{isAdmin ? 'Admin' : 'Student'}</span>
                         </div>
                     </CardContent>
                 </Card>
 
-                 <Button variant="destructive" className="w-full">
+                 <Button variant="destructive" className="w-full" onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                 </Button>

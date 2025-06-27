@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,10 +8,12 @@ import { useFlow } from "@genkit-ai/next/client";
 import { generateBookSummary } from "@/ai/flows/generate-book-summary";
 import { books, categories as bookCategories, type Book } from "@/lib/mock-data";
 
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,10 +28,37 @@ const uploadBookSchema = z.object({
   category: z.string().min(1, "Please select a category"),
   pdfFile: z.any().refine(files => files?.length > 0, "A PDF file is required."),
 });
-
 type UploadBookValues = z.infer<typeof uploadBookSchema>;
 
+
 export default function AdminPage() {
+    const { isAdmin, isLoggedIn } = useAuth();
+    const router = useRouter();
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (!isLoggedIn || !isAdmin) {
+                router.replace('/login');
+            } else {
+                setIsCheckingAuth(false);
+            }
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [isLoggedIn, isAdmin, router]);
+
+    if (isCheckingAuth) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    return <AdminDashboard />;
+}
+
+function AdminDashboard() {
   const [currentBooks, setCurrentBooks] = useState<Book[]>(books);
   const { toast } = useToast();
 

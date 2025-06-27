@@ -1,15 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { BookOpen, Shield } from "lucide-react";
 
+const studentLoginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+type StudentLoginValues = z.infer<typeof studentLoginSchema>;
+
+const adminLoginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+type AdminLoginValues = z.infer<typeof adminLoginSchema>;
+
 export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+  const { toast } = useToast();
+
+  const studentForm = useForm<StudentLoginValues>({
+    resolver: zodResolver(studentLoginSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const adminForm = useForm<AdminLoginValues>({
+    resolver: zodResolver(adminLoginSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const onStudentSubmit = (values: StudentLoginValues) => {
+    // Mock student login
+    login(values.email, 'student');
+    toast({ title: "Login Successful", description: "Welcome back, student!" });
+    router.push('/');
+  };
+
+  const onAdminSubmit = (values: AdminLoginValues) => {
+    if (values.email === "gnreddy3555@gmail.com" && values.password === "nandhu@sunny") {
+      login(values.email, 'admin');
+      toast({ title: "Admin Login Successful", description: "Redirecting to dashboard..." });
+      router.push('/admin');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Invalid admin credentials.",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
         <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] dark:bg-background dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)]">
@@ -37,18 +90,26 @@ export default function LoginPage() {
                 <CardTitle className="font-headline">Student Login</CardTitle>
                 <CardDescription>Enter your credentials to access the library.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-student">Email</Label>
-                  <Input id="email-student" type="email" placeholder="student@example.com" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-student">Password</Label>
-                  <Input id="password-student" type="password" required />
-                </div>
-                <Button type="submit" className="w-full">
-                  Login
-                </Button>
+              <CardContent>
+                <Form {...studentForm}>
+                  <form onSubmit={studentForm.handleSubmit(onStudentSubmit)} className="space-y-4">
+                    <FormField control={studentForm.control} name="email" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl><Input placeholder="student@example.com" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={studentForm.control} name="password" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl><Input type="password" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <Button type="submit" className="w-full">Login</Button>
+                  </form>
+                </Form>
                 <div className="mt-4 text-center text-sm">
                   Don&apos;t have an account?{" "}
                   <Link href="/signup" className="underline text-primary">
@@ -64,18 +125,26 @@ export default function LoginPage() {
                 <CardTitle className="font-headline flex items-center gap-2"><Shield size={24} /> Admin Login</CardTitle>
                 <CardDescription>Enter your admin credentials.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-admin">Admin Email</Label>
-                  <Input id="email-admin" type="email" placeholder="admin@example.com" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-admin">Password</Label>
-                  <Input id="password-admin" type="password" required />
-                </div>
-                <Button type="submit" className="w-full">
-                  Login as Admin
-                </Button>
+              <CardContent>
+                 <Form {...adminForm}>
+                  <form onSubmit={adminForm.handleSubmit(onAdminSubmit)} className="space-y-4">
+                    <FormField control={adminForm.control} name="email" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Admin Email</FormLabel>
+                        <FormControl><Input placeholder="admin@example.com" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={adminForm.control} name="password" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl><Input type="password" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <Button type="submit" className="w-full">Login as Admin</Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>

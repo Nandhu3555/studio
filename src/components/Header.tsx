@@ -1,21 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { BookOpen, User, LogIn, UserPlus } from 'lucide-react';
+import { BookOpen, User, LogIn, UserPlus, Shield, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export default function Header() {
     const pathname = usePathname();
+    const { isLoggedIn, isAdmin, logout } = useAuth();
     const isAuthPage = pathname === '/login' || pathname === '/signup';
 
     if (isAuthPage) {
         return null;
     }
-
-    // This is a mock state. In a real app, this would come from an auth context.
-    const isLoggedIn = false; 
-    const isAdmin = false;
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -34,7 +32,10 @@ export default function Header() {
                         <>
                             {isAdmin && (
                                 <Button asChild variant="outline" size="sm">
-                                    <Link href="/admin">Admin Panel</Link>
+                                    <Link href="/admin">
+                                        <Shield className="mr-2 h-4 w-4" />
+                                        Admin Panel
+                                    </Link>
                                 </Button>
                             )}
                             <Button asChild variant="ghost" size="icon">
@@ -42,6 +43,10 @@ export default function Header() {
                                     <User className="h-5 w-5" />
                                     <span className="sr-only">Profile</span>
                                 </Link>
+                            </Button>
+                             <Button variant="ghost" size="sm" onClick={logout}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Logout
                             </Button>
                         </>
                     ) : (
