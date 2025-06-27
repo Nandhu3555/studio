@@ -14,7 +14,59 @@ import { useBooks } from '@/context/BookContext';
 import { Input } from '@/components/ui/input';
 import { chatAboutBook } from '@/ai/flows/chat-about-book';
 
-function PdfViewer({ url }: { url: string }) {
+function PdfViewer({ url }: { url:string }) {
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // This will hold the created object URL
+    let newObjectUrl: string | null = null;
+
+    const setupPdf = async () => {
+      // Only process data URIs
+      if (url && url.startsWith('data:application/pdf')) {
+        try {
+          // fetch is a convenient way to convert data URI to a blob
+          const response = await fetch(url);
+          const blob = await response.blob();
+          newObjectUrl = URL.createObjectURL(blob);
+          setObjectUrl(newObjectUrl);
+        } catch (error) {
+          console.error("Error creating object URL for PDF:", error);
+          setObjectUrl(null); // Fallback on error
+        }
+      } else {
+        // For regular URLs (like the initial dummy pdf), use them directly
+        setObjectUrl(url);
+      }
+    };
+
+    setupPdf();
+
+    // Cleanup function to revoke the object URL and prevent memory leaks
+    return () => {
+      if (newObjectUrl) {
+        URL.revokeObjectURL(newObjectUrl);
+      }
+    };
+  }, [url]);
+
+  // Display a loading indicator while the PDF is being processed
+  if (!objectUrl) {
+    return (
+        <Card className="mt-8">
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2"><FileText /> PDF Viewer</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="w-full h-[800px] bg-muted rounded-md flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="ml-2 text-muted-foreground">Loading PDF...</p>
+                </div>
+            </CardContent>
+        </Card>
+    );
+  }
+
   return (
     <Card className="mt-8">
       <CardHeader>
@@ -23,14 +75,14 @@ function PdfViewer({ url }: { url: string }) {
       <CardContent>
         <div className="w-full h-[800px] bg-muted rounded-md">
             <object
-                data={url}
+                data={objectUrl}
                 type="application/pdf"
                 width="100%"
                 height="100%"
                 className="rounded-md"
             >
                 <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-                    <p className="text-muted-foreground">Your browser does not support embedded PDFs. Please try a different browser to read the book.</p>
+                    <p className="text-muted-foreground">This browser does not support embedded PDFs. Please try a different browser to read the book.</p>
                 </div>
             </object>
         </div>
