@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -14,28 +14,32 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
-  const router = useRouter();
-
-  useEffect(() => {
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
     try {
-        const storedIsLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-        const storedIsAdmin = sessionStorage.getItem('isAdmin') === 'true';
-        const storedUser = sessionStorage.getItem('user');
-
-        if (storedIsLoggedIn) {
-        setIsLoggedIn(true);
-        setIsAdmin(storedIsAdmin);
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        }
-    } catch (error) {
-        console.error("Could not access session storage:", error);
+      return typeof window !== 'undefined' && sessionStorage.getItem('isLoggedIn') === 'true';
+    } catch {
+      return false;
     }
-  }, []);
+  });
+  const [isAdmin, setIsAdmin] = useState(() => {
+    try {
+      return typeof window !== 'undefined' && sessionStorage.getItem('isAdmin') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [user, setUser] = useState<{ name: string; email: string } | null>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const storedUser = sessionStorage.getItem('user');
+        return storedUser ? JSON.parse(storedUser) : null;
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  });
+  const router = useRouter();
 
   const login = (email: string, role: 'student' | 'admin') => {
     const userData = { name: role === 'admin' ? 'Admin User' : 'B.Tech Student', email };

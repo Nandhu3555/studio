@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { categories as initialCategories } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,9 +12,31 @@ interface CategoryContextType {
 
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
 
+const CATEGORIES_STORAGE_KEY = 'btechlib_categories';
+
+
 export function CategoryProvider({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState<string[]>(initialCategories);
+  const [categories, setCategories] = useState<string[]>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const storedCategories = sessionStorage.getItem(CATEGORIES_STORAGE_KEY);
+        return storedCategories ? JSON.parse(storedCategories) : initialCategories;
+      }
+    } catch (error) {
+      console.error("Could not access session storage for categories:", error);
+    }
+    return initialCategories;
+  });
+  
   const { toast } = useToast();
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+    } catch (error) {
+      console.error("Could not write to session storage for categories:", error);
+    }
+  }, [categories]);
 
   const addCategory = (categoryName: string) => {
     if (categories.find(c => c.toLowerCase() === categoryName.toLowerCase())) {

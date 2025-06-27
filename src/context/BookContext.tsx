@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { books as initialBooks, type Book } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,9 +13,30 @@ interface BookContextType {
 
 const BookContext = createContext<BookContextType | undefined>(undefined);
 
+const BOOKS_STORAGE_KEY = 'btechlib_books';
+
 export function BookProvider({ children }: { children: ReactNode }) {
-  const [books, setBooks] = useState<Book[]>(initialBooks);
+  const [books, setBooks] = useState<Book[]>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const storedBooks = sessionStorage.getItem(BOOKS_STORAGE_KEY);
+        return storedBooks ? JSON.parse(storedBooks) : initialBooks;
+      }
+    } catch (error) {
+      console.error("Could not access session storage for books:", error);
+    }
+    return initialBooks;
+  });
+
   const { toast } = useToast();
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
+    } catch (error) {
+      console.error("Could not write to session storage for books:", error);
+    }
+  }, [books]);
 
   const addBook = (book: Book) => {
     setBooks(prevBooks => [book, ...prevBooks]);
