@@ -16,27 +16,32 @@ const BookContext = createContext<BookContextType | undefined>(undefined);
 const BOOKS_STORAGE_KEY = 'btechlib_books';
 
 export function BookProvider({ children }: { children: ReactNode }) {
-  const [books, setBooks] = useState<Book[]>(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const storedBooks = localStorage.getItem(BOOKS_STORAGE_KEY);
-        return storedBooks ? JSON.parse(storedBooks) : initialBooks;
-      }
-    } catch (error) {
-      console.error("Could not access local storage for books:", error);
-    }
-    return initialBooks;
-  });
-
+  const [books, setBooks] = useState<Book[]>(initialBooks);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     try {
-      localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
+      const storedBooks = localStorage.getItem(BOOKS_STORAGE_KEY);
+      if (storedBooks) {
+        setBooks(JSON.parse(storedBooks));
+      }
     } catch (error) {
-      console.error("Could not write to local storage for books:", error);
+      console.error("Could not access local storage for books:", error);
+    } finally {
+        setIsLoaded(true);
     }
-  }, [books]);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      try {
+        localStorage.setItem(BOOKS_STORAGE_KEY, JSON.stringify(books));
+      } catch (error) {
+        console.error("Could not write to local storage for books:", error);
+      }
+    }
+  }, [books, isLoaded]);
 
   const addBook = (book: Book) => {
     setBooks(prevBooks => [book, ...prevBooks]);

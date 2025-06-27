@@ -16,27 +16,32 @@ const CATEGORIES_STORAGE_KEY = 'btechlib_categories';
 
 
 export function CategoryProvider({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState<string[]>(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const storedCategories = localStorage.getItem(CATEGORIES_STORAGE_KEY);
-        return storedCategories ? JSON.parse(storedCategories) : initialCategories;
-      }
-    } catch (error) {
-      console.error("Could not access local storage for categories:", error);
-    }
-    return initialCategories;
-  });
-  
+  const [categories, setCategories] = useState<string[]>(initialCategories);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     try {
-      localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+        const storedCategories = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+        if (storedCategories) {
+            setCategories(JSON.parse(storedCategories));
+        }
     } catch (error) {
-      console.error("Could not write to local storage for categories:", error);
+      console.error("Could not access local storage for categories:", error);
+    } finally {
+        setIsLoaded(true);
     }
-  }, [categories]);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+        try {
+          localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+        } catch (error) {
+          console.error("Could not write to local storage for categories:", error);
+        }
+    }
+  }, [categories, isLoaded]);
 
   const addCategory = (categoryName: string) => {
     if (categories.find(c => c.toLowerCase() === categoryName.toLowerCase())) {
