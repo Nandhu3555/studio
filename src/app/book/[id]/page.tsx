@@ -7,7 +7,7 @@ import type { Book } from '@/lib/mock-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, ThumbsDown, ThumbsUp, Send, Mic, Loader2, Download } from 'lucide-react';
+import { ArrowLeft, FileText, ThumbsDown, ThumbsUp, Send, Mic, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBooks } from '@/context/BookContext';
@@ -17,7 +17,6 @@ import { chatAboutBook } from '@/ai/flows/chat-about-book';
 // A placeholder for the PDF viewer component
 function PdfViewer({ url }: { url: string }) {
   // The <object> tag is generally more reliable for embedding PDF data URIs.
-  // We provide a fallback link for browsers that might not support it.
   return (
     <Card className="mt-8">
       <CardHeader>
@@ -33,13 +32,7 @@ function PdfViewer({ url }: { url: string }) {
                 className="rounded-md"
             >
                 <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-                    <p className="text-muted-foreground mb-4">Your browser does not support embedded PDFs.</p>
-                    <Button asChild>
-                        <a href={url} download="book.pdf">
-                            <Download className="mr-2 h-4 w-4" />
-                            Download PDF
-                        </a>
-                    </Button>
+                    <p className="text-muted-foreground">Your browser does not support embedded PDFs. Please try a different browser to read the book.</p>
                 </div>
             </object>
         </div>
