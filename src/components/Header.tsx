@@ -5,14 +5,66 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { BookOpen, User, LogIn, UserPlus, Shield, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { Skeleton } from "./ui/skeleton";
 
 export default function Header() {
     const pathname = usePathname();
-    const { isLoggedIn, isAdmin, logout } = useAuth();
+    const { isLoggedIn, isAdmin, logout, isAuthReady } = useAuth();
     const isAuthPage = pathname === '/login' || pathname === '/signup';
 
     if (isAuthPage) {
         return null;
+    }
+
+    const renderAuthButtons = () => {
+        if (!isAuthReady) {
+            return (
+                <div className="flex items-center gap-2">
+                    <Skeleton className="h-9 w-24" />
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                </div>
+            );
+        }
+        if (isLoggedIn) {
+            return (
+                <>
+                    {isAdmin && (
+                        <Button asChild variant="outline" size="sm">
+                            <Link href="/admin">
+                                <Shield className="mr-2 h-4 w-4" />
+                                Admin Panel
+                            </Link>
+                        </Button>
+                    )}
+                    <Button asChild variant="ghost" size="icon">
+                        <Link href="/profile">
+                            <User className="h-5 w-5" />
+                            <span className="sr-only">Profile</span>
+                        </Link>
+                    </Button>
+                     <Button variant="ghost" size="sm" onClick={logout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                    </Button>
+                </>
+            );
+        }
+        return (
+            <>
+                <Button asChild variant="ghost" size="sm">
+                    <Link href="/login">
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Login
+                    </Link>
+                </Button>
+                <Button asChild size="sm">
+                    <Link href="/signup">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Sign Up
+                    </Link>
+                </Button>
+            </>
+        );
     }
 
     return (
@@ -28,43 +80,7 @@ export default function Header() {
                     {/* Add more nav links here if needed */}
                 </nav>
                 <div className="flex items-center justify-end space-x-2">
-                    {isLoggedIn ? (
-                        <>
-                            {isAdmin && (
-                                <Button asChild variant="outline" size="sm">
-                                    <Link href="/admin">
-                                        <Shield className="mr-2 h-4 w-4" />
-                                        Admin Panel
-                                    </Link>
-                                </Button>
-                            )}
-                            <Button asChild variant="ghost" size="icon">
-                                <Link href="/profile">
-                                    <User className="h-5 w-5" />
-                                    <span className="sr-only">Profile</span>
-                                </Link>
-                            </Button>
-                             <Button variant="ghost" size="sm" onClick={logout}>
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Logout
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <Button asChild variant="ghost" size="sm">
-                                <Link href="/login">
-                                    <LogIn className="mr-2 h-4 w-4" />
-                                    Login
-                                </Link>
-                            </Button>
-                            <Button asChild size="sm">
-                                <Link href="/signup">
-                                    <UserPlus className="mr-2 h-4 w-4" />
-                                    Sign Up
-                                </Link>
-                            </Button>
-                        </>
-                    )}
+                    {renderAuthButtons()}
                 </div>
             </div>
         </header>

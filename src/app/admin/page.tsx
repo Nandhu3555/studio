@@ -49,22 +49,18 @@ type AddCategoryValues = z.infer<typeof addCategorySchema>;
 
 
 export default function AdminPage() {
-    const { isAdmin, isLoggedIn } = useAuth();
+    const { isAdmin, isLoggedIn, isAuthReady } = useAuth();
     const router = useRouter();
-    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        if (isAuthReady) {
             if (!isLoggedIn || !isAdmin) {
                 router.replace('/login');
-            } else {
-                setIsCheckingAuth(false);
             }
-        }, 100);
-        return () => clearTimeout(timer);
-    }, [isLoggedIn, isAdmin, router]);
+        }
+    }, [isLoggedIn, isAdmin, isAuthReady, router]);
 
-    if (isCheckingAuth) {
+    if (!isAuthReady || !isLoggedIn || !isAdmin) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />

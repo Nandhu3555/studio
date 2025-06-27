@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -9,37 +9,33 @@ interface AuthContextType {
   user: { name: string; email: string } | null;
   login: (email: string, role: 'student' | 'admin') => void;
   logout: () => void;
+  isAuthReady: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    try {
-      return typeof window !== 'undefined' && sessionStorage.getItem('isLoggedIn') === 'true';
-    } catch {
-      return false;
-    }
-  });
-  const [isAdmin, setIsAdmin] = useState(() => {
-    try {
-      return typeof window !== 'undefined' && sessionStorage.getItem('isAdmin') === 'true';
-    } catch {
-      return false;
-    }
-  });
-  const [user, setUser] = useState<{ name: string; email: string } | null>(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const storedUser = sessionStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : null;
-      }
-    } catch {
-      return null;
-    }
-    return null;
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const loggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+      const admin = sessionStorage.getItem('isAdmin') === 'true';
+      const storedUser = sessionStorage.getItem('user');
+      
+      setIsLoggedIn(loggedIn);
+      setIsAdmin(admin);
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+    } catch (error) {
+        console.error("Could not access session storage for auth:", error);
+    } finally {
+        setIsAuthReady(true);
+    }
+  }, []);
 
   const login = (email: string, role: 'student' | 'admin') => {
     const userData = { name: role === 'admin' ? 'Admin User' : 'B.Tech Student', email };
@@ -73,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAdmin, user, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, isAdmin, user, login, logout, isAuthReady }}>
       {children}
     </AuthContext.Provider>
   );

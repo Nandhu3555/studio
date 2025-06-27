@@ -9,16 +9,16 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function ProfilePage() {
-    const { user, isLoggedIn, isAdmin, logout } = useAuth();
+    const { user, isLoggedIn, isAdmin, logout, isAuthReady } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        if (!isLoggedIn) {
+        if (isAuthReady && !isLoggedIn) {
             router.replace('/login');
         }
-    }, [isLoggedIn, router]);
+    }, [isAuthReady, isLoggedIn, router]);
 
-    if (!user) {
+    if (!isAuthReady || !user) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
