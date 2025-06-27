@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/Header';
 import { AuthProvider } from '@/context/AuthContext';
+import { BookProvider } from '@/context/BookContext';
 
 export const metadata: Metadata = {
   title: 'B-Tech Lib',
@@ -23,9 +24,11 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
-          <Header />
-          <main>{children}</main>
-          <Toaster />
+          <BookProvider>
+            <Header />
+            <main>{children}</main>
+            <Toaster />
+          </BookProvider>
         </AuthProvider>
       </body>
     </html>

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { generateBookSummary } from "@/ai/flows/generate-book-summary";
-import { books, categories as bookCategories, type Book } from "@/lib/mock-data";
+import { categories as bookCategories, type Book } from "@/lib/mock-data";
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Trash2, UploadCloud } from "lucide-react";
+import { useBooks } from "@/context/BookContext";
 
 const uploadBookSchema = z.object({
   bookTitle: z.string().min(3, "Title must be at least 3 characters"),
@@ -58,27 +59,14 @@ export default function AdminPage() {
 }
 
 function AdminDashboard() {
-  const [currentBooks, setCurrentBooks] = useState<Book[]>(books);
-  const { toast } = useToast();
-
-  const handleDelete = (bookId: string) => {
-    setCurrentBooks(prev => prev.filter(book => book.id !== bookId));
-    toast({
-      title: "Book Deleted",
-      description: "The book has been removed from the library.",
-    });
-  };
-
-  const handleBookAdded = (newBook: Book) => {
-    setCurrentBooks(prev => [newBook, ...prev]);
-  };
+  const { books, deleteBook } = useBooks();
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold font-headline text-primary mb-8">Admin Dashboard</h1>
       <div className="grid lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1">
-          <UploadBookForm onBookAdded={handleBookAdded} />
+          <UploadBookForm />
         </div>
         <div className="lg:col-span-2">
           <Card>
@@ -96,12 +84,12 @@ function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentBooks.map(book => (
+                  {books.map(book => (
                     <TableRow key={book.id}>
                       <TableCell className="font-medium">{book.title}</TableCell>
                       <TableCell>{book.category}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(book.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => deleteBook(book.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                           <span className="sr-only">Delete</span>
                         </Button>
@@ -118,7 +106,8 @@ function AdminDashboard() {
   );
 }
 
-function UploadBookForm({ onBookAdded }: { onBookAdded: (book: Book) => void }) {
+function UploadBookForm() {
+  const { addBook } = useBooks();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -154,7 +143,7 @@ function UploadBookForm({ onBookAdded }: { onBookAdded: (book: Book) => void }) 
             pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
             summary: summaryResult.summary
         };
-        onBookAdded(newBook);
+        addBook(newBook);
         toast({
           title: "Book Uploaded Successfully!",
           description: `"${values.bookTitle}" has been added with an AI-generated summary.`,

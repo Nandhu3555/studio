@@ -3,13 +3,14 @@
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { books, type Book } from '@/lib/mock-data';
+import type { Book } from '@/lib/mock-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, FileText, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useBooks } from '@/context/BookContext';
 
 // A placeholder for the PDF viewer component
 function PdfViewer({ url }: { url: string }) {
@@ -48,11 +49,12 @@ export default function BookDetailPage() {
   const params = useParams();
   const bookId = params.id as string;
   const [book, setBook] = useState<Book | null>(null);
+  const { findBookById } = useBooks();
 
   useEffect(() => {
-    const foundBook = books.find(b => b.id === bookId) || null;
+    const foundBook = findBookById(bookId) || null;
     setBook(foundBook);
-  }, [bookId]);
+  }, [bookId, findBookById]);
 
   if (!book) {
     return (
