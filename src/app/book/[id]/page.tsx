@@ -38,7 +38,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-function DetailRow({ label, value }: { label: string, value: string | number }) {
+function DetailRow({ label, value }: { label: string | number, value: string | number }) {
     return (
         <div className="flex justify-between items-center py-2 border-b last:border-b-0">
             <dt className="font-semibold text-foreground">{label}</dt>
@@ -47,9 +47,14 @@ function DetailRow({ label, value }: { label: string, value: string | number }) 
     );
 }
 
+const getMimeTypeFromDataUrl = (dataUrl: string): string => {
+    if (!dataUrl || !dataUrl.startsWith('data:')) return 'application/octet-stream';
+    return dataUrl.substring(dataUrl.indexOf(':') + 1, dataUrl.indexOf(';'));
+};
+
 const getFileExtensionFromDataUrl = (dataUrl: string): string => {
     if (!dataUrl || !dataUrl.startsWith('data:')) return 'bin';
-    const mimeType = dataUrl.substring(dataUrl.indexOf(':') + 1, dataUrl.indexOf(';'));
+    const mimeType = getMimeTypeFromDataUrl(dataUrl);
     switch (mimeType) {
         case 'application/pdf':
             return 'pdf';
@@ -97,12 +102,9 @@ export default function BookDetailPage() {
           url: window.location.href,
         });
       } catch (error) {
-        // "Permission denied" (NotAllowedError) and user cancellation (AbortError) are expected use-cases,
-        // not true errors. We'll ignore them and gracefully fall back to copying the link.
         if (error instanceof DOMException && (error.name === "AbortError" || error.name === "NotAllowedError")) {
-          // Silently fall back.
+          // Silently fall back if user cancels or permission is denied.
         } else {
-          // Log other, unexpected errors.
           console.error("Share failed with an unexpected error:", error);
         }
         fallbackShare();
@@ -136,6 +138,7 @@ export default function BookDetailPage() {
   }
 
   const fileExtension = getFileExtensionFromDataUrl(book.documentUrl);
+  const isPdf = getMimeTypeFromDataUrl(book.documentUrl) === 'application/pdf';
 
   return (
     <div className="bg-background min-h-screen">
@@ -168,9 +171,15 @@ export default function BookDetailPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Button asChild size="lg" className="md:col-span-1">
-            <a href={book.documentUrl} download={`${book.title}.${fileExtension}`}>
+            {isPdf ? (
+              <Link href={`/book/${book.id}/read`}>
                 <BookOpen className="mr-2 h-4 w-4" /> Read Book
-            </a>
+              </Link>
+            ) : (
+               <a href={book.documentUrl} download={`${book.title}.${fileExtension}`}>
+                <BookOpen className="mr-2 h-4 w-4" /> Read Book
+              </a>
+            )}
           </Button>
           <Button asChild size="lg" variant="secondary" className="md:col-span-1">
             <a href={book.documentUrl} download={`${book.title}.${fileExtension}`}>
