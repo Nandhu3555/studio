@@ -6,8 +6,9 @@ import { users as initialUsers, type User } from '@/lib/mock-data';
 
 interface UserContextType {
   users: User[];
-  addUser: (user: Omit<User, 'id' | 'createdAt'>) => User;
+  addUser: (user: Omit<User, 'id' | 'createdAt' | 'avatarUrl'>) => User;
   findUserByEmail: (email: string) => User | undefined;
+  updateUser: (id: string, data: Partial<User>) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -43,7 +44,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [users, isLoaded]);
   
 
-  const addUser = (user: Omit<User, 'id' | 'createdAt'>) => {
+  const addUser = (user: Omit<User, 'id' | 'createdAt' | 'avatarUrl'>) => {
     const newUser: User = {
         ...user,
         id: (Math.random() * 1000).toString(),
@@ -57,8 +58,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return users.find(u => u.email.toLowerCase() === email.toLowerCase());
   };
 
+  const updateUser = (id: string, data: Partial<User>) => {
+    setUsers(prevUsers =>
+      prevUsers.map(u => (u.id === id ? { ...u, ...data } : u))
+    );
+  };
+
   return (
-    <UserContext.Provider value={{ users, addUser, findUserByEmail }}>
+    <UserContext.Provider value={{ users, addUser, findUserByEmail, updateUser }}>
       {children}
     </UserContext.Provider>
   );

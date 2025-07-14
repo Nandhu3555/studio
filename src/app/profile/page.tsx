@@ -5,16 +5,28 @@ import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, LogOut, Moon, Sun, Laptop } from "lucide-react";
+import { Loader2, LogOut, Moon, Sun, Laptop, Camera } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+
+const fileToDataUrl = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
 export default function ProfilePage() {
-    const { user, isLoggedIn, isAdmin, logout, isAuthReady } = useAuth();
+    const { user, isLoggedIn, isAdmin, logout, isAuthReady, updateUser } = useAuth();
     const router = useRouter();
     const { setTheme } = useTheme();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (isAuthReady && !isLoggedIn) {
@@ -29,6 +41,37 @@ export default function ProfilePage() {
             </div>
         );
     }
+    
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                toast({
+                    variant: "destructive",
+                    title: "Image too large",
+                    description: "Please select an image smaller than 2MB.",
+                });
+                return;
+            }
+            try {
+                const dataUrl = await fileToDataUrl(file);
+                updateUser({ avatarUrl: dataUrl });
+                toast({
+                    title: "Profile picture updated!",
+                });
+            } catch (error) {
+                toast({
+                    variant: "destructive",
+                    title: "Update failed",
+                    description: "Could not update profile picture.",
+                });
+            }
+        }
+    };
 
     const initials = user.name
         .split(' ')
@@ -43,10 +86,28 @@ export default function ProfilePage() {
       <div className="max-w-2xl mx-auto">
         <Card className="w-full">
           <CardHeader className="flex flex-col items-center text-center">
-            <Avatar className="h-24 w-24 mb-4">
-              <AvatarImage src={`https://placehold.co/100x100/7E57C2/FFFFFF?text=${initials}`} alt={user.name} data-ai-hint="person portrait" />
-              <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
-            </Avatar>
+             <div className="relative group">
+                <Avatar className="h-24 w-24 mb-4">
+                  <AvatarImage src={user.avatarUrl} alt={user.name} />
+                  <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
+                </Avatar>
+                <Button 
+                    onClick={handleAvatarClick}
+                    variant="outline" 
+                    size="icon" 
+                    className="absolute bottom-4 right-0 rounded-full h-8 w-8 bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Change profile picture"
+                >
+                    <Camera className="h-4 w-4" />
+                </Button>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/png, image/jpeg, image/webp"
+                    className="hidden"
+                />
+            </div>
             <CardTitle className="text-2xl font-headline">{user.name}</CardTitle>
             <CardDescription>{user.email}</CardDescription>
           </CardHeader>

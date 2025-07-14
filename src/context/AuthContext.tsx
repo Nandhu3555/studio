@@ -14,6 +14,7 @@ interface AuthContextType {
   user: LoggedInUser | null;
   login: (email: string, role: 'student' | 'admin') => void;
   logout: () => void;
+  updateUser: (data: Partial<LoggedInUser>) => void;
   isAuthReady: boolean;
 }
 
@@ -25,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<LoggedInUser | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const router = useRouter();
-  const { findUserByEmail } = useUsers();
+  const { findUserByEmail, updateUser: updateUserInUserContext } = useUsers();
 
   useEffect(() => {
     try {
@@ -53,7 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email, 
             createdAt: new Date(),
             branch: 'Administration',
-            year: 0
+            year: 0,
+            avatarUrl: undefined,
         };
     } else {
         const foundUser = findUserByEmail(email);
@@ -93,8 +95,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/login');
   };
 
+  const updateUser = (data: Partial<LoggedInUser>) => {
+    if (user) {
+        const updatedUser = { ...user, ...data };
+        setUser(updatedUser);
+        updateUserInUserContext(updatedUser.id, data);
+        try {
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+        } catch (error) {
+            console.error("Could not access local storage:", error);
+        }
+    }
+  };
+
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAdmin, user, login, logout, isAuthReady }}>
+    <AuthContext.Provider value={{ isLoggedIn, isAdmin, user, login, logout, isAuthReady, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -25,6 +25,7 @@ export type User = {
     createdAt: Date;
     branch: string;
     year: number;
+    avatarUrl?: string;
 };
 
 export type Activity = {
