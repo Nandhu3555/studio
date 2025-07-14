@@ -40,9 +40,9 @@ function StarRating({ rating }: { rating: number }) {
 
 function DetailRow({ label, value }: { label: string, value: string | number }) {
     return (
-        <div className="flex justify-between py-2">
-            <dt className="text-muted-foreground">{label}</dt>
-            <dd className="font-medium text-foreground">{value}</dd>
+        <div className="flex justify-between items-center py-2 border-b last:border-b-0">
+            <dt className="font-semibold text-foreground">{label}</dt>
+            <dd className="text-muted-foreground text-right">{value}</dd>
         </div>
     );
 }
@@ -163,12 +163,12 @@ export default function BookDetailPage() {
         <Card>
             <CardContent className="p-6 space-y-6">
                 <div>
-                    <h3 className="text-lg font-semibold font-headline mb-2">Description</h3>
+                    <h3 className="text-xl font-bold font-headline mb-4">Description</h3>
                     <p className="text-foreground/80 text-sm leading-relaxed">{book.description}</p>
                 </div>
                 <Separator />
                 <div>
-                     <h3 className="text-lg font-semibold font-headline mb-2">Details</h3>
+                     <h3 className="text-xl font-bold font-headline mb-4">Details</h3>
                      <dl>
                         <DetailRow label="Language" value={book.language} />
                         <DetailRow label="Pages" value={book.pages} />
