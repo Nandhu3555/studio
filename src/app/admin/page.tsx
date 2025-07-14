@@ -71,6 +71,7 @@ const uploadPaperSchema = z.object({
   subject: z.string().min(3, "Subject must be at least 3 characters"),
   year: z.coerce.number().min(2000, "Please enter a valid year").max(new Date().getFullYear(), "Year cannot be in the future"),
   semester: z.string().min(1, "Please select a semester"),
+  examType: z.string().min(1, "Please select an exam type"),
   branch: z.string().min(1, "Please select a branch"),
   studyYear: z.string().min(1, "Please select a study year"),
   documentFile: z
@@ -394,6 +395,7 @@ function UploadExamPaperForm() {
             subject: "",
             year: undefined,
             semester: "",
+            examType: "",
             branch: "",
             studyYear: "",
             documentFile: undefined,
@@ -409,6 +411,7 @@ function UploadExamPaperForm() {
               subject: values.subject,
               year: values.year,
               semester: values.semester,
+              examType: values.examType,
               branch: values.branch,
               studyYear: `${values.studyYear}${parseInt(values.studyYear) === 1 ? 'st' : parseInt(values.studyYear) === 2 ? 'nd' : parseInt(values.studyYear) === 3 ? 'rd' : 'th'} Year`,
               documentUrl: documentUrl
@@ -465,6 +468,30 @@ function UploadExamPaperForm() {
                                 )}
                             />
                             <FormField
+                              control={form.control}
+                              name="examType"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Exam Type</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select an exam type" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="Mid-1">Mid-1</SelectItem>
+                                      <SelectItem value="Mid-2">Mid-2</SelectItem>
+                                      <SelectItem value="Sem">Sem</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <FormField
                                 control={form.control}
                                 name="semester"
                                 render={({ field }) => (
@@ -483,14 +510,14 @@ function UploadExamPaperForm() {
                                                 <SelectItem value="4th Sem">4th Sem</SelectItem>
                                                 <SelectItem value="5th Sem">5th Sem</SelectItem>
                                                 <SelectItem value="6th Sem">6th Sem</SelectItem>
+                                                <SelectItem value="7th Sem">7th Sem</SelectItem>
+                                                <SelectItem value="8th Sem">8th Sem</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name="branch"
@@ -513,6 +540,8 @@ function UploadExamPaperForm() {
                                     </FormItem>
                                 )}
                             />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name="studyYear"
@@ -681,6 +710,7 @@ function ManageQuestionPapersCard() {
                 <TableRow>
                     <TableHead>Subject</TableHead>
                     <TableHead>Year</TableHead>
+                    <TableHead>Exam Type</TableHead>
                     <TableHead>Branch</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -690,6 +720,7 @@ function ManageQuestionPapersCard() {
                     <TableRow key={paper.id}>
                     <TableCell className="font-medium">{paper.subject}</TableCell>
                     <TableCell>{paper.year}</TableCell>
+                    <TableCell>{paper.examType}</TableCell>
                     <TableCell>{paper.branch}</TableCell>
                     <TableCell className="text-right">
                         <Button variant="ghost" size="icon" onClick={() => deletePaper(paper.id)}>
@@ -743,4 +774,3 @@ function ManageUsersCard() {
         </Card>
     );
 }
-

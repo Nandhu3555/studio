@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useQuestionPapers } from "@/context/QuestionPaperContext";
+import { type QuestionPaper } from "@/lib/mock-data";
 
 const branches = ["All", "Computer Science", "Mechanical", "Electronics", "Civil"];
 const studyYears = ["All", "1st Year", "2nd Year", "3rd Year", "4th Year"];
@@ -82,14 +83,14 @@ export default function ExamPapersPage() {
         </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredPapers.map((paper) => (
+        {filteredPapers.map((paper: QuestionPaper) => (
           <Card key={paper.id} className="flex flex-col">
             <CardHeader>
               <CardTitle className="font-headline flex items-start gap-3">
                 <FileText className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                 <span className="flex-1">{paper.subject}</span>
               </CardTitle>
-              <CardDescription>{paper.year} - {paper.semester} Exam</CardDescription>
+              <CardDescription>{paper.year} - {paper.examType} - {paper.semester}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow">
               <div className="flex gap-2">
