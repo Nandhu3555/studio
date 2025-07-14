@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { BookOpen, User, LogIn, UserPlus, Shield, LogOut, Mail } from 'lucide-react';
+import { BookOpen, User, LogIn, UserPlus, Shield, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Skeleton } from "./ui/skeleton";
 
@@ -81,12 +81,6 @@ export default function Header() {
                     {/* Add more nav links here if needed */}
                 </nav>
                 <div className="flex items-center justify-end space-x-2">
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href="mailto:support@btechlib.com">
-                            <Mail className="mr-2 h-4 w-4" />
-                            Contact Us
-                        </Link>
-                    </Button>
                     {renderAuthButtons()}
                 </div>
             </div>
