@@ -37,7 +37,7 @@ export default function RootLayout({
                 <BookProvider>
                   <CategoryProvider>
                     <Header />
-                    <main>{children}</main>
+                    <main className="py-4">{children}</main>
                     <Toaster />
                   </CategoryProvider>
                 </BookProvider>
