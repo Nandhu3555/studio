@@ -12,6 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { sendEmail } from '@/services/emailService';
 
 const SendOtpInputSchema = z.object({
   email: z.string().email().describe("The user's email address to send the OTP to."),
@@ -38,13 +39,19 @@ const sendOtpFlow = ai.defineFlow(
     // For this example, we'll generate a simple 6-digit code.
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Here you would integrate with an email service like SendGrid, Nodemailer, etc.
-    // to send the OTP to the user's email address.
-    // For example: await emailService.send({ to: email, body: `Your OTP is: ${otp}` });
-
+    // Send the email using our email service.
+    // In this prototype, it will log to the console.
+    // To send real emails, configure your .env file.
+    await sendEmail({
+      to: email,
+      subject: 'Your B-Tech Lib OTP Code',
+      text: `Your One-Time Password is: ${otp}`,
+      html: `<p>Your One-Time Password is: <strong>${otp}</strong></p>`,
+    });
+    
     console.log(`Generated OTP for ${email}: ${otp}`);
 
-    // For this prototype, we return the OTP to the frontend to simulate the process.
+    // For this prototype, we still return the OTP to the frontend to simulate the process.
     return { otp };
   }
 );
