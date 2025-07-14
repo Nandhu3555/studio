@@ -1,4 +1,5 @@
 
+
 export type Remark = {
   id: string;
   text: string;
@@ -55,6 +56,16 @@ export type Notification = {
     read: boolean;
 };
 
+export type QuestionPaper = {
+  id: string;
+  subject: string;
+  year: number;
+  semester: string;
+  branch: string;
+  studyYear: string;
+  documentUrl: string;
+};
+
 
 export const categories = [
   "All",
@@ -102,6 +113,17 @@ export const notifications: Notification[] = [
         timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
         read: true,
     }
+];
+
+export const questionPapers: QuestionPaper[] = [
+  { id: "1", subject: "Data Structures & Algorithms", year: 2023, semester: "Mid-Term", branch: "Computer Science", studyYear: "2nd Year", documentUrl: "" },
+  { id: "2", subject: "Computer Networks", year: 2023, semester: "Final", branch: "Computer Science", studyYear: "3rd Year", documentUrl: "" },
+  { id: "3", subject: "Advanced Engineering Mathematics", year: 2022, semester: "Final", branch: "Mathematics", studyYear: "1st Year", documentUrl: "" },
+  { id: "4", subject: "Shigley's Mechanical Engineering Design", year: 2023, semester: "Mid-Term", branch: "Mechanical", studyYear: "3rd Year", documentUrl: "" },
+  { id: "5", subject: "Structural Analysis", year: 2022, semester: "Final", branch: "Civil", studyYear: "4th Year", documentUrl: "" },
+  { id: "6", subject: "Microelectronic Circuits", year: 2023, semester: "Final", branch: "Electronics", studyYear: "2nd Year", documentUrl: "" },
+  { id: "7", subject: "Theory of Machines", year: 2022, semester: "Final", branch: "Mechanical", studyYear: "2nd Year", documentUrl: "" },
+  { id: "8", subject: "Database Management Systems", year: 2023, semester: "Mid-Term", branch: "Computer Science", studyYear: "2nd Year", documentUrl: "" },
 ];
 
 

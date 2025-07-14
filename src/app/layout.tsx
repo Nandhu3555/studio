@@ -8,6 +8,7 @@ import { UserProvider } from '@/context/UserContext';
 import { CategoryProvider } from '@/context/CategoryContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { NotificationProvider } from '@/context/NotificationContext';
+import { QuestionPaperProvider } from '@/context/QuestionPaperContext';
 
 export const metadata: Metadata = {
   title: 'B-Tech Lib',
@@ -37,11 +38,13 @@ export default function RootLayout({
               <AuthProvider>
                 <BookProvider>
                   <CategoryProvider>
-                    <NotificationProvider>
-                      <Header />
-                      <main className="py-4">{children}</main>
-                      <Toaster />
-                    </NotificationProvider>
+                    <QuestionPaperProvider>
+                      <NotificationProvider>
+                        <Header />
+                        <main className="py-4">{children}</main>
+                        <Toaster />
+                      </NotificationProvider>
+                    </QuestionPaperProvider>
                   </CategoryProvider>
                 </BookProvider>
               </AuthProvider>

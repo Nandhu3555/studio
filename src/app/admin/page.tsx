@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { recentActivity, type Activity, type Book } from "@/lib/mock-data";
+import { recentActivity, type Activity, type Book, type QuestionPaper } from "@/lib/mock-data";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import { useBooks } from "@/context/BookContext";
 import { useUsers } from "@/context/UserContext";
 import { useCategories } from "@/context/CategoryContext";
 import { useNotifications } from "@/context/NotificationContext";
+import { useQuestionPapers } from "@/context/QuestionPaperContext";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 5000000; // 5MB
@@ -151,6 +152,7 @@ function AdminDashboard() {
   const { books } = useBooks();
   const { users } = useUsers();
   const { categories } = useCategories();
+  const { papers } = useQuestionPapers();
   const totalCategories = categories.filter(c => c !== "All").length;
 
   return (
@@ -160,9 +162,10 @@ function AdminDashboard() {
             <p className="text-muted-foreground">Manage your digital library</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
             <StatCard icon={<Users className="h-5 w-5" />} title="Total Users" value={users.length} color="text-blue-500" />
             <StatCard icon={<BookOpen className="h-5 w-5" />} title="Total Books" value={books.length} color="text-green-500" />
+            <StatCard icon={<FileText className="h-5 w-5" />} title="Total Papers" value={papers.length} color="text-purple-500" />
             <StatCard icon={<FolderKanban className="h-5 w-5" />} title="Categories" value={totalCategories} color="text-orange-500" />
         </div>
       
@@ -174,6 +177,7 @@ function AdminDashboard() {
                     <ManageBooksCard />
                     <ManageCategoriesCard />
                  </div>
+                <ManageQuestionPapersCard />
             </div>
             <div className="lg:col-span-1">
                 <Card>
@@ -425,6 +429,7 @@ function UploadBookForm() {
 }
 
 function UploadExamPaperForm() {
+    const { addPaper } = useQuestionPapers();
     const { categories } = useCategories();
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
@@ -443,13 +448,19 @@ function UploadExamPaperForm() {
 
     async function onSubmit(values: UploadPaperValues) {
         setLoading(true);
-        console.log("Uploading exam paper:", values);
-        // Here you would typically handle the file upload and save the metadata
         try {
             const documentUrl = await fileToDataUrl(values.documentFile[0]);
-            // In a real app, you would save this to a new context or database
-            // For now, we just log it and show a success message
-            console.log({ ...values, documentUrl });
+            
+            const newPaper: Omit<QuestionPaper, 'id'> = {
+              subject: values.subject,
+              year: values.year,
+              semester: values.semester,
+              branch: values.branch,
+              studyYear: `${values.studyYear}${parseInt(values.studyYear) === 1 ? 'st' : parseInt(values.studyYear) === 2 ? 'nd' : parseInt(values.studyYear) === 3 ? 'rd' : 'th'} Year`,
+              documentUrl: documentUrl
+            };
+            addPaper(newPaper);
+            
             toast({
                 title: "Exam Paper Uploaded!",
                 description: `"${values.subject}" paper has been uploaded.`,
@@ -698,4 +709,42 @@ function ManageCategoriesCard() {
     );
 }
 
+function ManageQuestionPapersCard() {
+    const { papers, deletePaper } = useQuestionPapers();
+    return (
+        <Card>
+            <CardHeader>
+            <CardTitle className="font-headline">Manage Question Papers</CardTitle>
+            <CardDescription>View and delete existing question papers.</CardDescription>
+            </CardHeader>
+            <CardContent>
+            <Table>
+                <TableHeader>
+                <TableRow>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead>Branch</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+                </TableHeader>
+                <TableBody>
+                {papers.map(paper => (
+                    <TableRow key={paper.id}>
+                    <TableCell className="font-medium">{paper.subject}</TableCell>
+                    <TableCell>{paper.year}</TableCell>
+                    <TableCell>{paper.branch}</TableCell>
+                    <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => deletePaper(paper.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <span className="sr-only">Delete</span>
+                        </Button>
+                    </TableCell>
+                    </TableRow>
+                ))}
+                </TableBody>
+            </Table>
+            </CardContent>
+        </Card>
+    );
+}
     

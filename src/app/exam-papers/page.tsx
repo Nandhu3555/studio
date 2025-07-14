@@ -7,30 +7,36 @@ import { Download, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
+import { useQuestionPapers } from "@/context/QuestionPaperContext";
 
 const branches = ["All", "Computer Science", "Mechanical", "Electronics", "Civil"];
 const studyYears = ["All", "1st Year", "2nd Year", "3rd Year", "4th Year"];
 
-const papers = [
-  { id: 1, subject: "Data Structures & Algorithms", year: 2023, semester: "Mid-Term", branch: "Computer Science", studyYear: "2nd Year" },
-  { id: 2, subject: "Computer Networks", year: 2023, semester: "Final", branch: "Computer Science", studyYear: "3rd Year" },
-  { id: 3, subject: "Advanced Engineering Mathematics", year: 2022, semester: "Final", branch: "Mathematics", studyYear: "1st Year" },
-  { id: 4, subject: "Shigley's Mechanical Engineering Design", year: 2023, semester: "Mid-Term", branch: "Mechanical", studyYear: "3rd Year" },
-  { id: 5, subject: "Structural Analysis", year: 2022, semester: "Final", branch: "Civil", studyYear: "4th Year" },
-  { id: 6, subject: "Microelectronic Circuits", year: 2023, semester: "Final", branch: "Electronics", studyYear: "2nd Year" },
-  { id: 7, subject: "Theory of Machines", year: 2022, semester: "Final", branch: "Mechanical", studyYear: "2nd Year" },
-  { id: 8, subject: "Database Management Systems", year: 2023, semester: "Mid-Term", branch: "Computer Science", studyYear: "2nd Year" },
-];
-
 export default function ExamPapersPage() {
+  const { papers } = useQuestionPapers();
   const { toast } = useToast();
   const [activeBranch, setActiveBranch] = useState("All");
   const [activeYear, setActiveYear] = useState("All");
 
-  const handleDownload = () => {
+  const handleDownload = (paper: { documentUrl: string, subject: string }) => {
+    if (!paper.documentUrl) {
+      toast({
+        variant: "destructive",
+        title: "Download Not Available",
+        description: "The document for this paper is missing.",
+      });
+      return;
+    }
+     const link = document.createElement('a');
+      link.href = paper.documentUrl;
+      link.download = `${paper.subject.replace(/ /g, '_')}_paper.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
     toast({
-      title: "Feature Not Available",
-      description: "Downloading question papers is not yet implemented.",
+      title: "Download Started",
+      description: `Downloading ${paper.subject} paper.`,
     });
   };
   
@@ -92,7 +98,7 @@ export default function ExamPapersPage() {
               </div>
             </CardContent>
             <div className="p-4 pt-0">
-               <Button className="w-full" onClick={handleDownload}>
+               <Button className="w-full" onClick={() => handleDownload(paper)}>
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </Button>
