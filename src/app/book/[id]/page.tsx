@@ -47,6 +47,26 @@ function DetailRow({ label, value }: { label: string, value: string | number }) 
     );
 }
 
+const getFileExtensionFromDataUrl = (dataUrl: string): string => {
+    if (!dataUrl || !dataUrl.startsWith('data:')) return 'bin';
+    const mimeType = dataUrl.substring(dataUrl.indexOf(':') + 1, dataUrl.indexOf(';'));
+    switch (mimeType) {
+        case 'application/pdf':
+            return 'pdf';
+        case 'application/msword':
+            return 'doc';
+        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            return 'docx';
+        case 'application/vnd.ms-powerpoint':
+            return 'ppt';
+        case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+            return 'pptx';
+        default:
+            const parts = mimeType.split('/');
+            return parts[parts.length - 1] || 'bin';
+    }
+};
+
 export default function BookDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -115,6 +135,8 @@ export default function BookDetailPage() {
     );
   }
 
+  const fileExtension = getFileExtensionFromDataUrl(book.documentUrl);
+
   return (
     <div className="bg-background min-h-screen">
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm">
@@ -151,7 +173,7 @@ export default function BookDetailPage() {
             </Link>
           </Button>
           <Button asChild size="lg" variant="secondary" className="md:col-span-1">
-            <a href={book.documentUrl} download={`${book.title}.pdf`}>
+            <a href={book.documentUrl} download={`${book.title}.${fileExtension}`}>
               <Download className="mr-2 h-4 w-4" /> Download
             </a>
           </Button>
