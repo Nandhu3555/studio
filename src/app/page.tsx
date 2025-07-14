@@ -36,8 +36,9 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <section className="relative text-center md:text-left py-16 md:py-24 rounded-lg overflow-hidden mb-12">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent"></div>
-          <div className="absolute inset-0 bg-grid-slate-900/[0.04] bg-[bottom_1px_center] dark:bg-grid-slate-400/[0.05] dark:bg-bottom dark:border-b dark:border-slate-100/5" style={{ maskImage: 'linear-gradient(to_bottom, transparent, black)' }}></div>
+           <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] dark:bg-background dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)]">
+                <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
+            </div>
 
           <div className="relative grid md:grid-cols-2 gap-8 items-center">
               <div className="space-y-6">
@@ -50,7 +51,7 @@ export default function Home() {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                     <Button size="lg" asChild>
                       <Link href="#browse">
-                        Explore Books
+                        Explore Books <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
                     <Button size="lg" variant="outline">Learn More</Button>
