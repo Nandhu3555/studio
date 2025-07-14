@@ -103,7 +103,14 @@ export default function LoginPage() {
                     )} />
                     <FormField control={studentForm.control} name="password" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <div className="flex items-center justify-between">
+                            <FormLabel>Password</FormLabel>
+                            <Link href="/forgot-password" passHref>
+                                <Button variant="link" size="sm" className="h-auto p-0 text-xs">
+                                    Forgot password?
+                                </Button>
+                            </Link>
+                        </div>
                         <FormControl><Input type="password" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
@@ -138,7 +145,14 @@ export default function LoginPage() {
                     )} />
                     <FormField control={adminForm.control} name="password" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                         <div className="flex items-center justify-between">
+                            <FormLabel>Password</FormLabel>
+                            <Link href="/forgot-password" passHref>
+                                <Button variant="link" size="sm" className="h-auto p-0 text-xs">
+                                    Forgot password?
+                                </Button>
+                            </Link>
+                        </div>
                         <FormControl><Input type="password" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
