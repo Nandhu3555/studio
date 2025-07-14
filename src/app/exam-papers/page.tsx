@@ -5,18 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Separator } from "@/components/ui/separator";
+
+const branches = ["All", "Computer Science", "Mechanical", "Electronics", "Civil"];
+const studyYears = ["All", "1st Year", "2nd Year", "3rd Year", "4th Year"];
 
 const papers = [
-  { id: 1, subject: "Data Structures & Algorithms", year: 2023, semester: "Mid-Term" },
-  { id: 2, subject: "Computer Networks", year: 2023, semester: "Final" },
-  { id: 3, subject: "Advanced Engineering Mathematics", year: 2022, semester: "Final" },
-  { id: 4, subject: "Shigley's Mechanical Engineering Design", year: 2023, semester: "Mid-Term" },
-  { id: 5, subject: "Structural Analysis", year: 2022, semester: "Final" },
-  { id: 6, subject: "Microelectronic Circuits", year: 2023, semester: "Final" },
+  { id: 1, subject: "Data Structures & Algorithms", year: 2023, semester: "Mid-Term", branch: "Computer Science", studyYear: "2nd Year" },
+  { id: 2, subject: "Computer Networks", year: 2023, semester: "Final", branch: "Computer Science", studyYear: "3rd Year" },
+  { id: 3, subject: "Advanced Engineering Mathematics", year: 2022, semester: "Final", branch: "Mathematics", studyYear: "1st Year" },
+  { id: 4, subject: "Shigley's Mechanical Engineering Design", year: 2023, semester: "Mid-Term", branch: "Mechanical", studyYear: "3rd Year" },
+  { id: 5, subject: "Structural Analysis", year: 2022, semester: "Final", branch: "Civil", studyYear: "4th Year" },
+  { id: 6, subject: "Microelectronic Circuits", year: 2023, semester: "Final", branch: "Electronics", studyYear: "2nd Year" },
+  { id: 7, subject: "Theory of Machines", year: 2022, semester: "Final", branch: "Mechanical", studyYear: "2nd Year" },
+  { id: 8, subject: "Database Management Systems", year: 2023, semester: "Mid-Term", branch: "Computer Science", studyYear: "2nd Year" },
 ];
 
 export default function ExamPapersPage() {
   const { toast } = useToast();
+  const [activeBranch, setActiveBranch] = useState("All");
+  const [activeYear, setActiveYear] = useState("All");
 
   const handleDownload = () => {
     toast({
@@ -24,6 +33,10 @@ export default function ExamPapersPage() {
       description: "Downloading question papers is not yet implemented.",
     });
   };
+  
+  const filteredPapers = papers
+    .filter(paper => activeBranch === "All" || paper.branch === activeBranch)
+    .filter(paper => activeYear === "All" || paper.studyYear === activeYear);
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -33,9 +46,37 @@ export default function ExamPapersPage() {
           Browse previous year question papers to prepare for your exams.
         </p>
       </div>
+      
+      <div className="flex flex-col items-center gap-4 mb-10">
+            <div className="flex flex-wrap justify-center gap-2">
+              {branches.map((branch) => (
+                <Button
+                  key={branch}
+                  variant={activeBranch === branch ? "default" : "outline"}
+                  onClick={() => setActiveBranch(branch)}
+                  className="rounded-full transition-all duration-300"
+                >
+                  {branch}
+                </Button>
+              ))}
+            </div>
+            <Separator className="w-1/2 mx-auto my-2" />
+             <div className="flex flex-wrap justify-center gap-2">
+              {studyYears.map((year) => (
+                <Button
+                  key={year}
+                  variant={activeYear === year ? "secondary" : "outline"}
+                  onClick={() => setActiveYear(year)}
+                  className="rounded-full transition-all duration-300"
+                >
+                  {year}
+                </Button>
+              ))}
+            </div>
+        </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {papers.map((paper) => (
+        {filteredPapers.map((paper) => (
           <Card key={paper.id} className="flex flex-col">
             <CardHeader>
               <CardTitle className="font-headline flex items-start gap-3">
@@ -45,7 +86,10 @@ export default function ExamPapersPage() {
               <CardDescription>{paper.year} - {paper.semester} Exam</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow">
-              {/* Future content can go here, like difficulty or topics covered */}
+              <div className="flex gap-2">
+                <span className="text-xs font-semibold bg-secondary text-secondary-foreground px-2 py-1 rounded-full">{paper.branch}</span>
+                <span className="text-xs font-semibold bg-muted text-muted-foreground px-2 py-1 rounded-full">{paper.studyYear}</span>
+              </div>
             </CardContent>
             <div className="p-4 pt-0">
                <Button className="w-full" onClick={handleDownload}>
@@ -56,6 +100,12 @@ export default function ExamPapersPage() {
           </Card>
         ))}
       </div>
+        {filteredPapers.length === 0 && (
+            <div className="col-span-full text-center py-16">
+              <h3 className="text-2xl font-headline font-semibold">No Papers Found</h3>
+              <p className="text-muted-foreground mt-2">Try adjusting your filter criteria.</p>
+            </div>
+        )}
     </div>
   );
 }
