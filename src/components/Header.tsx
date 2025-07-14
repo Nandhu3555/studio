@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { BookOpen, User, LogIn, UserPlus, Shield, LogOut } from 'lucide-react';
+import { BookOpen, User, LogIn, UserPlus, Shield, LogOut, Home } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Skeleton } from "./ui/skeleton";
 
@@ -37,6 +37,12 @@ export default function Header() {
                             </Link>
                         </Button>
                     )}
+                    <Button asChild variant="ghost" size="icon">
+                        <Link href="/">
+                            <Home className="h-5 w-5" />
+                            <span className="sr-only">Home</span>
+                        </Link>
+                    </Button>
                     <Button asChild variant="ghost" size="icon">
                         <Link href="/profile">
                             <User className="h-5 w-5" />
