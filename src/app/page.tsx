@@ -55,7 +55,7 @@ export default function Home() {
                       </Link>
                     </Button>
                     <Button size="lg" variant="outline" asChild>
-                      <Link href="/learn-more">Learn More</Link>
+                      <Link href="/ask-me">Ask Me</Link>
                     </Button>
                   </div>
               </div>

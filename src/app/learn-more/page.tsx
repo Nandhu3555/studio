@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowUpRight, BrainCircuit } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function LearnMorePage() {
+export default function AskMePage() {
   const router = useRouter();
 
   return (
@@ -18,7 +18,7 @@ export default function LearnMorePage() {
             <div className="mx-auto bg-primary/10 text-primary p-4 rounded-full w-fit mb-4">
               <BrainCircuit className="h-10 w-10" />
             </div>
-            <CardTitle className="text-3xl font-headline">Explore with AI</CardTitle>
+            <CardTitle className="text-3xl font-headline">Ask Me Anything</CardTitle>
             <CardDescription className="text-lg text-muted-foreground pt-2">
               Have questions about a topic? Need a concept explained differently? Use the power of AI to deepen your understanding.
             </CardDescription>
