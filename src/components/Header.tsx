@@ -8,8 +8,9 @@ import { BookOpen, User, LogIn, UserPlus, Shield, LogOut, Home, Bell, BookCheck,
 import { usePathname } from 'next/navigation';
 import { Skeleton } from "./ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { type Notification, notifications } from "@/lib/mock-data";
+import { type Notification } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { useNotifications } from "@/context/NotificationContext";
 
 const getTimeAgo = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
@@ -32,7 +33,8 @@ const notificationIcons: Record<Notification['type'], React.ReactNode> = {
 export default function Header() {
     const pathname = usePathname();
     const { isLoggedIn, isAdmin, logout, isAuthReady } = useAuth();
-    const isAuthPage = pathname === '/login' || pathname === '/signup';
+    const { notifications } = useNotifications();
+    const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
 
     if (isAuthPage) {
         return null;
@@ -87,7 +89,7 @@ export default function Header() {
                                         <div className="flex-1">
                                             <p className="font-semibold text-sm">{notif.title}</p>
                                             <p className="text-sm text-muted-foreground">{notif.description}</p>
-                                            <p className="text-xs text-muted-foreground/70 mt-1">{getTimeAgo(notif.timestamp)}</p>
+                                            <p className="text-xs text-muted-foreground/70 mt-1">{getTimeAgo(new Date(notif.timestamp))}</p>
                                         </div>
                                     </div>
                                 ))}

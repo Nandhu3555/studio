@@ -20,6 +20,7 @@ import { Loader2, Trash2, UploadCloud, Users, BookOpen, FolderKanban, Download, 
 import { useBooks } from "@/context/BookContext";
 import { useUsers } from "@/context/UserContext";
 import { useCategories } from "@/context/CategoryContext";
+import { useNotifications } from "@/context/NotificationContext";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 5000000; // 5MB
@@ -196,6 +197,7 @@ const fileToDataUrl = (file: File): Promise<string> => {
 function UploadBookForm() {
   const { addBook } = useBooks();
   const { categories } = useCategories();
+  const { addNotification } = useNotifications();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -240,6 +242,11 @@ function UploadBookForm() {
           publisher: "Tech Books Inc.",
       };
       addBook(newBook);
+      addNotification({
+        type: 'new_book',
+        title: 'New Book Added!',
+        description: `"${values.bookTitle}" is now available in the library.`,
+      });
       toast({
         title: "Book Uploaded Successfully!",
         description: `"${values.bookTitle}" has been added to the library.`,

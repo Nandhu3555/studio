@@ -7,6 +7,7 @@ import { BookProvider } from '@/context/BookContext';
 import { UserProvider } from '@/context/UserContext';
 import { CategoryProvider } from '@/context/CategoryContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { NotificationProvider } from '@/context/NotificationContext';
 
 export const metadata: Metadata = {
   title: 'B-Tech Lib',
@@ -36,9 +37,11 @@ export default function RootLayout({
               <AuthProvider>
                 <BookProvider>
                   <CategoryProvider>
-                    <Header />
-                    <main className="py-4">{children}</main>
-                    <Toaster />
+                    <NotificationProvider>
+                      <Header />
+                      <main className="py-4">{children}</main>
+                      <Toaster />
+                    </NotificationProvider>
                   </CategoryProvider>
                 </BookProvider>
               </AuthProvider>

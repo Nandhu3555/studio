@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sendOtp } from "@/ai/flows/send-otp-flow";
 import { BookOpen, Loader2 } from "lucide-react";
 import { useUsers } from "@/context/UserContext";
+import { useNotifications } from "@/context/NotificationContext";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -36,6 +37,7 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { findUserByEmail } = useUsers();
+  const { addNotification } = useNotifications();
   
   const [step, setStep] = useState<'email' | 'reset'>('email');
   const [userEmail, setUserEmail] = useState<string>('');
@@ -71,7 +73,8 @@ export default function ForgotPasswordPage() {
         setStep('reset');
         toast({
             title: "OTP Sent!",
-            description: "An OTP has been sent to your email. Check the console for the preview link.",
+            description: "An OTP has been 'sent' to your email. Check the console for the preview link.",
+            duration: 9000
         });
     } catch (error) {
         console.error("Failed to get OTP:", error);
@@ -91,6 +94,11 @@ export default function ForgotPasswordPage() {
       // In a real app, you would now update the user's password in your database.
       // For this prototype, we'll just simulate success.
       console.log(`Password for ${userEmail} has been reset to: ${values.newPassword}`);
+       addNotification({
+        type: 'password_changed',
+        title: 'Security Alert',
+        description: 'Your password was changed successfully.',
+      });
       toast({
         title: "Password Reset Successful",
         description: "You can now log in with your new password.",

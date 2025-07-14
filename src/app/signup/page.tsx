@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { categories } from "@/lib/mock-data";
 import { sendOtp } from "@/ai/flows/send-otp-flow";
+import { useNotifications } from "@/context/NotificationContext";
 
 type UserDetails = {
     name: string;
@@ -29,6 +30,7 @@ export default function SignupPage() {
   const { addUser, findUserByEmail } = useUsers();
   const { login } = useAuth();
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
   
   const [step, setStep] = useState<'details' | 'otp'>('details');
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
@@ -73,7 +75,7 @@ export default function SignupPage() {
         setStep('otp');
         toast({
             title: "OTP Sent!",
-            description: "An OTP has been sent to your email. Please check the console for the preview link.",
+            description: "An OTP has been 'sent' to your email. Please check the console for the preview link.",
             duration: 9000,
         });
     } catch (error) {
@@ -97,6 +99,11 @@ export default function SignupPage() {
     if (otp === generatedOtp && userDetails) {
       const newUser = addUser({ name: userDetails.name, email: userDetails.email, branch: userDetails.branch, year: parseInt(userDetails.year) });
       login(newUser.email, 'student');
+      addNotification({
+        type: 'new_user',
+        title: 'Welcome to B-Tech Lib!',
+        description: 'Your account has been created successfully.',
+      });
       toast({
         title: "Account Created!",
         description: "Welcome to B-Tech Lib.",
