@@ -3,25 +3,42 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Loader2 } from "lucide-react";
 import { useUsers } from "@/context/UserContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { categories } from "@/lib/mock-data";
+import { sendOtp } from "@/ai/flows/send-otp-flow";
+
+type UserDetails = {
+    name: string;
+    email: string;
+    password: string;
+    branch: string;
+    year: string;
+};
 
 export default function SignupPage() {
   const router = useRouter();
   const { addUser, findUserByEmail } = useUsers();
   const { login } = useAuth();
   const { toast } = useToast();
+  
+  const [step, setStep] = useState<'details' | 'otp'>('details');
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [generatedOtp, setGeneratedOtp] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+
+  const handleDetailsSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
     const formData = new FormData(event.currentTarget);
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
@@ -29,17 +46,56 @@ export default function SignupPage() {
     const branch = formData.get('branch') as string;
     const year = formData.get('year') as string;
 
+    if (!name || !email || !password || !branch || !year) {
+        toast({
+            variant: "destructive",
+            title: "Missing Information",
+            description: "Please fill out all fields.",
+        });
+        setIsLoading(false);
+        return;
+    }
+
     if (findUserByEmail(email)) {
         toast({
             variant: "destructive",
             title: "Account Exists",
             description: "An account with this email already exists. Please login.",
         });
+        setIsLoading(false);
         return;
     }
 
-    if (name && email && password && branch && year) {
-      const newUser = addUser({ name, email, branch, year: parseInt(year) });
+    try {
+        const { otp } = await sendOtp({ email });
+        setGeneratedOtp(otp);
+        setUserDetails({ name, email, password, branch, year });
+        setStep('otp');
+        toast({
+            title: "OTP Sent!",
+            description: `We've "sent" an OTP to your email. For this demo, your OTP is: ${otp}`,
+            duration: 9000,
+        });
+    } catch (error) {
+        console.error("Failed to get OTP:", error);
+        toast({
+            variant: "destructive",
+            title: "OTP Generation Failed",
+            description: "Could not generate an OTP. Please try again.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsLoading(true);
+    const formData = new FormData(event.currentTarget);
+    const otp = formData.get('otp') as string;
+
+    if (otp === generatedOtp && userDetails) {
+      const newUser = addUser({ name: userDetails.name, email: userDetails.email, branch: userDetails.branch, year: parseInt(userDetails.year) });
       login(newUser.email, 'student');
       toast({
         title: "Account Created!",
@@ -49,9 +105,10 @@ export default function SignupPage() {
     } else {
         toast({
             variant: "destructive",
-            title: "Missing Information",
-            description: "Please fill out all fields to create an account.",
+            title: "Invalid OTP",
+            description: "The OTP you entered is incorrect. Please try again.",
         });
+        setIsLoading(false);
     }
   };
   
@@ -68,60 +125,81 @@ export default function SignupPage() {
                     B-Tech Lib
                 </span>
             </Link>
-          <CardTitle className="font-headline text-2xl mt-4">Create an account</CardTitle>
-          <CardDescription>Enter your information to get started.</CardDescription>
+          <CardTitle className="font-headline text-2xl mt-4">
+            {step === 'details' ? 'Create an account' : 'Enter OTP'}
+          </CardTitle>
+          <CardDescription>
+            {step === 'details' ? 'Enter your information to get started.' : `An OTP has been sent to ${userDetails?.email}`}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" name="name" placeholder="John Doe" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="student@example.com" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="branch">Branch</Label>
-                <Select name="branch" required>
-                    <SelectTrigger id="branch">
-                        <SelectValue placeholder="Select your branch" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {categories.filter(c => c !== "All" && c !== "Mathematics").map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="year">Year of Study</Label>
-                <Select name="year" required>
-                    <SelectTrigger id="year">
-                        <SelectValue placeholder="Select your year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="1">1st Year</SelectItem>
-                        <SelectItem value="2">2nd Year</SelectItem>
-                        <SelectItem value="3">3rd Year</SelectItem>
-                        <SelectItem value="4">4th Year</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            <Button type="submit" className="w-full">
-              Create Account
-            </Button>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/login" className="underline text-primary">
-                Login
-              </Link>
-            </div>
-          </form>
+          {step === 'details' ? (
+            <form className="space-y-4" onSubmit={handleDetailsSubmit}>
+                <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input id="name" name="name" placeholder="John Doe" required />
+                </div>
+                <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" placeholder="student@example.com" required />
+                </div>
+                <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" name="password" type="password" required />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="branch">Branch</Label>
+                    <Select name="branch" required>
+                        <SelectTrigger id="branch">
+                            <SelectValue placeholder="Select your branch" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {categories.filter(c => c !== "All" && c !== "Mathematics").map(cat => (
+                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="year">Year of Study</Label>
+                    <Select name="year" required>
+                        <SelectTrigger id="year">
+                            <SelectValue placeholder="Select your year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="1">1st Year</SelectItem>
+                            <SelectItem value="2">2nd Year</SelectItem>
+                            <SelectItem value="3">3rd Year</SelectItem>
+                            <SelectItem value="4">4th Year</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending OTP...</> : "Get OTP"}
+                </Button>
+                <div className="mt-4 text-center text-sm">
+                Already have an account?{" "}
+                <Link href="/login" className="underline text-primary">
+                    Login
+                </Link>
+                </div>
+            </form>
+          ) : (
+            <form className="space-y-4" onSubmit={handleOtpSubmit}>
+                <div className="space-y-2">
+                    <Label htmlFor="otp">One-Time Password</Label>
+                    <Input id="otp" name="otp" type="text" placeholder="Enter 6-digit OTP" required maxLength={6} />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</> : "Verify & Create Account"}
+                </Button>
+                <div className="mt-4 text-center text-sm">
+                    <Button variant="link" type="button" onClick={() => setStep('details')}>
+                        Back to details
+                    </Button>
+                </div>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
