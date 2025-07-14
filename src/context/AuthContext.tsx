@@ -2,7 +2,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { type User } from '@/lib/mock-data';
 import { useUsers } from './UserContext';
 
@@ -20,6 +20,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Use a BroadcastChannel to sync auth state across tabs
+const authChannel = typeof window !== 'undefined' ? new BroadcastChannel('auth') : null;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -28,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { findUserByEmail, updateUser: updateUserInUserContext } = useUsers();
 
-  useEffect(() => {
+  const loadStateFromLocalStorage = useCallback(() => {
     try {
       const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
       const admin = localStorage.getItem('isAdmin') === 'true';
@@ -43,6 +46,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthReady(true);
     }
   }, []);
+
+  useEffect(() => {
+    loadStateFromLocalStorage();
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'AUTH_CHANGE') {
+        loadStateFromLocalStorage();
+      }
+    };
+
+    authChannel?.addEventListener('message', handleMessage);
+
+    return () => {
+      authChannel?.removeEventListener('message', handleMessage);
+    };
+  }, [loadStateFromLocalStorage]);
+
+  const notifyAuthChange = () => {
+    authChannel?.postMessage({ type: 'AUTH_CHANGE' });
+  };
 
   const login = (email: string, role: 'student' | 'admin') => {
     let userData: LoggedInUser | null = null;
@@ -73,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('isAdmin', role === 'admin' ? 'true' : 'false');
           localStorage.setItem('user', JSON.stringify(userData));
+          notifyAuthChange();
       } catch (error) {
           console.error("Could not access local storage:", error);
       }
@@ -88,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('isAdmin');
         localStorage.removeItem('user');
+        notifyAuthChange();
     } catch (error) {
         console.error("Could not access local storage:", error);
     }
@@ -102,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateUserInUserContext(updatedUser.id, data);
         try {
             localStorage.setItem('user', JSON.stringify(updatedUser));
+            notifyAuthChange();
         } catch (error) {
             console.error("Could not access local storage:", error);
         }
