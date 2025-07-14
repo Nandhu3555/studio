@@ -713,7 +713,7 @@ function ManageUsersCard() {
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2"><UserRound /> Manage Users</CardTitle>
-                <CardDescription>View registered student accounts.</CardDescription>
+                <CardDescription>Total users: {users.length}</CardDescription>
             </CardHeader>
             <CardContent>
                 <ScrollArea className="h-[400px]">
@@ -739,4 +739,5 @@ function ManageUsersCard() {
         </Card>
     );
 }
+
 
