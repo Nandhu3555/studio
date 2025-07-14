@@ -46,6 +46,16 @@ export type Activity = {
     timestamp: Date;
 };
 
+export type Notification = {
+    id: string;
+    type: 'new_book' | 'new_user' | 'password_changed';
+    title: string;
+    description: string;
+    timestamp: Date;
+    read: boolean;
+};
+
+
 export const categories = [
   "All",
   "Computer Science",
@@ -65,6 +75,33 @@ export const recentActivity: Activity[] = [
     { id: '1', type: 'download', user: 'John Doe', book: 'Data Structures & Algorithms', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
     { id: '2', type: 'new_user', user: 'Emily Davis', timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000) },
     { id: '3', type: 'bookmark', user: 'Jane Smith', book: 'Digital Electronics', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+];
+
+export const notifications: Notification[] = [
+    {
+        id: '1',
+        type: 'new_book',
+        title: 'New Book Added!',
+        description: '"Artificial Intelligence: A Modern Approach" is now available.',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        read: false,
+    },
+    {
+        id: '2',
+        type: 'new_user',
+        title: 'Account Created',
+        description: 'Welcome to B-Tech Lib! Start exploring our collection.',
+        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+        read: false,
+    },
+    {
+        id: '3',
+        type: 'password_changed',
+        title: 'Security Alert',
+        description: 'Your password was changed successfully.',
+        timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+        read: true,
+    }
 ];
 
 
