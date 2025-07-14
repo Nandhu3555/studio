@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { recentActivity, type Activity, type Book, type QuestionPaper } from "@/lib/mock-data";
+import { type Book, type QuestionPaper } from "@/lib/mock-data";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, UploadCloud, Users, BookOpen, FolderKanban, Download, UserPlus, Bookmark, PlusCircle, FileText } from "lucide-react";
+import { Loader2, Trash2, UploadCloud, Users, BookOpen, FolderKanban, Download, UserPlus, Bookmark, PlusCircle, FileText, UserRound } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
 import { useUsers } from "@/context/UserContext";
 import { useCategories } from "@/context/CategoryContext";
 import { useNotifications } from "@/context/NotificationContext";
 import { useQuestionPapers } from "@/context/QuestionPaperContext";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 5000000; // 5MB
@@ -118,36 +121,6 @@ function StatCard({ icon, title, value, color }: { icon: ReactNode, title: strin
     );
 }
 
-const getTimeAgo = (date: Date) => {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-    if (seconds < 60) return "Just now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days > 1 ? 's' : ''} ago`;
-};
-
-const activityIcons: Record<Activity['type'], ReactNode> = {
-    download: <Download className="h-4 w-4 text-primary" />,
-    new_user: <UserPlus className="h-4 w-4 text-green-500" />,
-    bookmark: <Bookmark className="h-4 w-4 text-orange-500" />,
-};
-
-const getActivityText = (activity: Activity) => {
-    switch (activity.type) {
-      case 'download':
-        return <p className="text-sm text-muted-foreground"><strong>{activity.user}</strong> downloaded <strong>{activity.book}</strong></p>;
-      case 'new_user':
-        return <p className="text-sm text-muted-foreground"><strong>{activity.user}</strong> created an account</p>;
-      case 'bookmark':
-        return <p className="text-sm text-muted-foreground"><strong>{activity.user}</strong> bookmarked <strong>{activity.book}</strong></p>;
-      default:
-        return null;
-    }
-};
-
 function AdminDashboard() {
   const { books } = useBooks();
   const { users } = useUsers();
@@ -180,26 +153,7 @@ function AdminDashboard() {
                 <ManageQuestionPapersCard />
             </div>
             <div className="lg:col-span-1">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline">Recent Activity</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-6">
-                        {recentActivity.map((activity) => (
-                            <div key={activity.id} className="flex items-start gap-4">
-                                <div className="bg-secondary p-2 rounded-full mt-1">
-                                    {activityIcons[activity.type]}
-                                </div>
-                                <div className="flex-1">
-                                    {getActivityText(activity)}
-                                    <p className="text-xs text-muted-foreground/70">{getTimeAgo(activity.timestamp)}</p>
-                                </div>
-                            </div>
-                        ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                <ManageUsersCard />
             </div>
         </div>
     </div>
@@ -748,3 +702,41 @@ function ManageQuestionPapersCard() {
     );
 }
     
+function ManageUsersCard() {
+    const { users } = useUsers();
+
+    const getInitials = (name: string) => {
+        return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2"><UserRound /> Manage Users</CardTitle>
+                <CardDescription>View registered student accounts.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                        {users.map(user => (
+                            <div key={user.id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-secondary">
+                                <Avatar>
+                                    <AvatarImage src={user.avatarUrl} alt={user.name} />
+                                    <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium truncate">{user.name}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                </div>
+                            </div>
+                        ))}
+                         {users.length === 0 && (
+                            <p className="text-sm text-center text-muted-foreground py-4">No users have signed up yet.</p>
+                        )}
+                    </div>
+                </ScrollArea>
+            </CardContent>
+        </Card>
+    );
+}
+
