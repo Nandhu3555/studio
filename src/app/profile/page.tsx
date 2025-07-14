@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, LogOut, Moon, Sun, Laptop, Camera } from "lucide-react";
+import { Loader2, LogOut, Moon, Sun, Laptop, Camera, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
@@ -164,6 +164,24 @@ export default function ProfilePage() {
                          <Button variant="outline" onClick={() => setTheme("system")}>
                             <Laptop className="mr-2 h-4 w-4" /> System
                          </Button>
+                    </CardContent>
+                </Card>
+                
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg font-headline flex items-center gap-2">
+                            <Mail className="h-5 w-5" />
+                            Contact Us
+                        </CardTitle>
+                         <CardDescription>Need help? Reach out to support.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <a 
+                            href="mailto:gnreddy355@gmail.com" 
+                            className="text-sm font-medium text-primary hover:underline"
+                        >
+                            gnreddy355@gmail.com
+                        </a>
                     </CardContent>
                 </Card>
 
