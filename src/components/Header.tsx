@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { BookOpen, User, LogIn, UserPlus, Shield, LogOut, Home, Bell, BookCheck, UserRoundPlus } from 'lucide-react';
+import { BookOpen, User, LogIn, UserPlus, Shield, LogOut, Home, Bell, BookCheck, UserRoundPlus, FileText } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Skeleton } from "./ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -64,6 +64,13 @@ export default function Header() {
                         <Link href="/">
                             <Home className="h-5 w-5" />
                             <span className="sr-only">Home</span>
+                        </Link>
+                    </Button>
+
+                    <Button asChild variant="ghost" size="icon">
+                        <Link href="/exam-papers">
+                            <FileText className="h-5 w-5" />
+                            <span className="sr-only">Exam Papers</span>
                         </Link>
                     </Button>
 
