@@ -477,8 +477,12 @@ function UploadExamPaperForm() {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="Mid-Term">Mid-Term</SelectItem>
-                                                <SelectItem value="Final">Final</SelectItem>
+                                                <SelectItem value="1st Sem">1st Sem</SelectItem>
+                                                <SelectItem value="2nd Sem">2nd Sem</SelectItem>
+                                                <SelectItem value="3rd Sem">3rd Sem</SelectItem>
+                                                <SelectItem value="4th Sem">4th Sem</SelectItem>
+                                                <SelectItem value="5th Sem">5th Sem</SelectItem>
+                                                <SelectItem value="6th Sem">6th Sem</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -739,5 +743,4 @@ function ManageUsersCard() {
         </Card>
     );
 }
-
 
