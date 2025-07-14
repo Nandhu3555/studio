@@ -102,12 +102,14 @@ export default function BookDetailPage() {
           url: window.location.href,
         });
       } catch (error) {
+        // This checks if the user cancelled the share dialog.
+        // We only fall back to clipboard copy if it's an actual error.
         if (error instanceof DOMException && (error.name === "AbortError" || error.name === "NotAllowedError")) {
-          // Silently fall back if user cancels or permission is denied.
+          // User cancelled the share, do nothing.
         } else {
-          console.error("Share failed with an unexpected error:", error);
+          console.error("Share failed, falling back to clipboard:", error);
+          fallbackShare();
         }
-        fallbackShare();
       }
     } else {
       fallbackShare();
