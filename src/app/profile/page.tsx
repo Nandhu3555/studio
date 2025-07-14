@@ -4,13 +4,15 @@ import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, LogOut, Moon, Sun, Laptop } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function ProfilePage() {
     const { user, isLoggedIn, isAdmin, logout, isAuthReady } = useAuth();
     const router = useRouter();
+    const { setTheme } = useTheme();
 
     useEffect(() => {
         if (isAuthReady && !isLoggedIn) {
@@ -63,6 +65,24 @@ export default function ProfilePage() {
                             <span className="text-muted-foreground">Role</span>
                             <span className="font-semibold text-primary">{isAdmin ? 'Admin' : 'Student'}</span>
                         </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg font-headline">Appearance</CardTitle>
+                        <CardDescription>Customize the look and feel of the app.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-3 gap-2">
+                         <Button variant="outline" onClick={() => setTheme("light")}>
+                           <Sun className="mr-2 h-4 w-4" /> Light
+                         </Button>
+                         <Button variant="outline" onClick={() => setTheme("dark")}>
+                           <Moon className="mr-2 h-4 w-4" /> Dark
+                         </Button>
+                         <Button variant="outline" onClick={() => setTheme("system")}>
+                            <Laptop className="mr-2 h-4 w-4" /> System
+                         </Button>
                     </CardContent>
                 </Card>
 
