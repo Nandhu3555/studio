@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, UploadCloud, Users, BookOpen, FolderKanban, Download, UserPlus, Bookmark, PlusCircle } from "lucide-react";
+import { Loader2, Trash2, UploadCloud, Users, BookOpen, FolderKanban, Download, UserPlus, Bookmark, PlusCircle, FileText } from "lucide-react";
 import { useBooks } from "@/context/BookContext";
 import { useUsers } from "@/context/UserContext";
 import { useCategories } from "@/context/CategoryContext";
@@ -62,6 +62,22 @@ const addCategorySchema = z.object({
     categoryName: z.string().min(3, "Category name must be at least 3 characters"),
 });
 type AddCategoryValues = z.infer<typeof addCategorySchema>;
+
+const uploadPaperSchema = z.object({
+  subject: z.string().min(3, "Subject must be at least 3 characters"),
+  year: z.coerce.number().min(2000, "Please enter a valid year").max(new Date().getFullYear(), "Year cannot be in the future"),
+  semester: z.string().min(1, "Please select a semester"),
+  branch: z.string().min(1, "Please select a branch"),
+  studyYear: z.string().min(1, "Please select a study year"),
+  documentFile: z
+    .any()
+    .refine((files) => files?.length === 1, "A document file is required.")
+    .refine(
+      (files) => ACCEPTED_DOC_TYPES.includes(files?.[0]?.type),
+      "Only .pdf, .doc, .docx, .ppt, .pptx files are accepted."
+    ),
+});
+type UploadPaperValues = z.infer<typeof uploadPaperSchema>;
 
 
 export default function AdminPage() {
@@ -153,6 +169,7 @@ function AdminDashboard() {
         <div className="grid lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2 space-y-8">
                 <UploadBookForm />
+                <UploadExamPaperForm />
                  <div className="grid md:grid-cols-2 gap-8">
                     <ManageBooksCard />
                     <ManageCategoriesCard />
@@ -407,6 +424,181 @@ function UploadBookForm() {
   );
 }
 
+function UploadExamPaperForm() {
+    const { categories } = useCategories();
+    const { toast } = useToast();
+    const [loading, setLoading] = useState(false);
+
+    const form = useForm<UploadPaperValues>({
+        resolver: zodResolver(uploadPaperSchema),
+        defaultValues: {
+            subject: "",
+            year: undefined,
+            semester: "",
+            branch: "",
+            studyYear: "",
+            documentFile: undefined,
+        },
+    });
+
+    async function onSubmit(values: UploadPaperValues) {
+        setLoading(true);
+        console.log("Uploading exam paper:", values);
+        // Here you would typically handle the file upload and save the metadata
+        try {
+            const documentUrl = await fileToDataUrl(values.documentFile[0]);
+            // In a real app, you would save this to a new context or database
+            // For now, we just log it and show a success message
+            console.log({ ...values, documentUrl });
+            toast({
+                title: "Exam Paper Uploaded!",
+                description: `"${values.subject}" paper has been uploaded.`,
+            });
+            form.reset();
+        } catch (error) {
+            console.error("Error uploading exam paper:", error);
+            toast({
+                variant: "destructive",
+                title: "Upload Failed",
+                description: "There was an error processing the exam paper.",
+            });
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2"><FileText /> Upload Exam Paper</CardTitle>
+                <CardDescription>Add a new question paper to the collection.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="subject"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Subject</FormLabel>
+                                    <FormControl><Input placeholder="Data Structures & Algorithms" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="year"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Exam Year</FormLabel>
+                                        <FormControl><Input type="number" placeholder={`e.g. ${new Date().getFullYear()}`} {...field} value={field.value ?? ''} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="semester"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Semester</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a semester" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="Mid-Term">Mid-Term</SelectItem>
+                                                <SelectItem value="Final">Final</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="branch"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Branch</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a branch" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {categories.filter(c => c !== "All" && c !== "Mathematics").map(cat => (
+                                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="studyYear"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Study Year</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a year" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="1">1st Year</SelectItem>
+                                                <SelectItem value="2">2nd Year</SelectItem>
+                                                <SelectItem value="3">3rd Year</SelectItem>
+                                                <SelectItem value="4">4th Year</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <FormField
+                            control={form.control}
+                            name="documentFile"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Question Paper Document</FormLabel>
+                                    <FormControl>
+                                        <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" onChange={(e) => field.onChange(e.target.files)} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" className="w-full" disabled={loading}>
+                            {loading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Uploading Paper...
+                                </>
+                            ) : (
+                                "Upload Paper"
+                            )}
+                        </Button>
+                    </form>
+                </Form>
+            </CardContent>
+        </Card>
+    );
+}
+
+
 function ManageBooksCard() {
     const { books, deleteBook } = useBooks();
     return (
@@ -505,3 +697,5 @@ function ManageCategoriesCard() {
         </Card>
     );
 }
+
+    
