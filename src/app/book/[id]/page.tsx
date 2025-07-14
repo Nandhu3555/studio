@@ -7,12 +7,15 @@ import { type Book } from '@/lib/mock-data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bookmark, Share2, Star, Download, BookOpen } from 'lucide-react';
+import { ArrowLeft, Bookmark, Share2, Star, Download, BookOpen, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBooks } from '@/context/BookContext';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 function StarRating({ rating }: { rating: number }) {
@@ -36,15 +39,6 @@ function StarRating({ rating }: { rating: number }) {
       <span className="ml-2 text-sm font-medium text-muted-foreground">{rating.toFixed(1)}</span>
     </div>
   );
-}
-
-function DetailRow({ label, value }: { label: string | number, value: string | number }) {
-    return (
-        <div className="flex justify-between items-center py-2 border-b last:border-b-0">
-            <dt className="font-semibold text-foreground">{label}</dt>
-            <dd className="text-muted-foreground text-right">{value}</dd>
-        </div>
-    );
 }
 
 const getMimeTypeFromDataUrl = (dataUrl: string): string => {
@@ -78,8 +72,11 @@ export default function BookDetailPage() {
   const bookId = params.id as string;
   const [book, setBook] = useState<Book | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const { findBookById } = useBooks();
+  const { findBookById, updateBook } = useBooks();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const [newRemark, setNewRemark] = useState("");
+
 
   useEffect(() => {
     if (bookId) {
@@ -115,6 +112,23 @@ export default function BookDetailPage() {
       fallbackShare();
     }
   };
+
+  const handleRemarkSubmit = () => {
+    if (!newRemark.trim() || !user || !book) return;
+    const remark = {
+        id: Date.now().toString(),
+        text: newRemark,
+        author: user.name,
+        avatarUrl: user.avatarUrl,
+        timestamp: new Date().toISOString()
+    };
+    const updatedRemarks = [...(book.remarks || []), remark];
+    updateBook(book.id, { remarks: updatedRemarks });
+    setBook(prev => prev ? { ...prev, remarks: updatedRemarks } : null);
+    setNewRemark("");
+    toast({ title: "Remark added!" });
+  };
+
 
   if (!book) {
     return (
@@ -201,13 +215,43 @@ export default function BookDetailPage() {
                 </div>
                 <Separator />
                 <div>
-                     <h3 className="text-xl font-bold font-headline mb-4">Details</h3>
-                     <dl>
-                        <DetailRow label="Language" value={book.language} />
-                        <DetailRow label="Pages" value={book.pages} />
-                        <DetailRow label="Publisher" value={book.publisher} />
-                        <DetailRow label="Year" value={book.year} />
-                     </dl>
+                     <h3 className="text-xl font-bold font-headline mb-4">Remarks</h3>
+                     <div className="space-y-4">
+                        {user && (
+                            <div className="flex gap-4">
+                                <Textarea 
+                                    placeholder="Leave a remark..."
+                                    value={newRemark}
+                                    onChange={(e) => setNewRemark(e.target.value)}
+                                    className="flex-grow"
+                                />
+                                <Button onClick={handleRemarkSubmit} size="icon" disabled={!newRemark.trim()}>
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+                        <div className="space-y-4">
+                            {book.remarks && book.remarks.length > 0 ? (
+                                book.remarks.slice().reverse().map(remark => (
+                                    <div key={remark.id} className="flex items-start gap-3 p-3 bg-secondary/50 rounded-lg">
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage src={remark.avatarUrl} />
+                                            <AvatarFallback>{remark.author.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between">
+                                                <p className="font-semibold text-sm">{remark.author}</p>
+                                                <p className="text-xs text-muted-foreground">{new Date(remark.timestamp).toLocaleDateString()}</p>
+                                            </div>
+                                            <p className="text-sm text-foreground/80 mt-1">{remark.text}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground text-center py-4">No remarks yet. Be the first to leave one!</p>
+                            )}
+                        </div>
+                     </div>
                 </div>
             </CardContent>
         </Card>

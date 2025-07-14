@@ -1,4 +1,12 @@
 
+export type Remark = {
+  id: string;
+  text: string;
+  author: string;
+  avatarUrl?: string;
+  timestamp: string;
+}
+
 export type Book = {
   id: string;
   title: string;
@@ -17,6 +25,7 @@ export type Book = {
   language: string;
   pages: number;
   publisher: string;
+  remarks?: Remark[];
 };
 
 export type User = {
@@ -78,6 +87,7 @@ export const books: Book[] = [
     language: "English",
     pages: 450,
     publisher: "Academic Press",
+    remarks: [],
   },
   {
     id: "2",
@@ -97,6 +107,7 @@ export const books: Book[] = [
     language: "English",
     pages: 1056,
     publisher: "McGraw-Hill",
+    remarks: [],
   },
   {
     id: "3",
@@ -116,6 +127,7 @@ export const books: Book[] = [
     language: "English",
     pages: 1280,
     publisher: "Oxford University Press",
+    remarks: [],
   },
   {
     id: "4",
@@ -135,6 +147,7 @@ export const books: Book[] = [
     language: "English",
     pages: 864,
     publisher: "Prentice Hall",
+    remarks: [],
   },
   {
     id: "5",
@@ -154,6 +167,7 @@ export const books: Book[] = [
     language: "English",
     pages: 1152,
     publisher: "Wiley",
+    remarks: [],
   },
   {
     id: "6",
@@ -173,5 +187,6 @@ export const books: Book[] = [
     language: "English",
     pages: 272,
     publisher: "Prentice Hall",
+    remarks: [],
   }
 ];

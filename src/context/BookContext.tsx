@@ -9,6 +9,7 @@ interface BookContextType {
   addBook: (book: Book) => void;
   deleteBook: (bookId: string) => void;
   findBookById: (id: string) => Book | undefined;
+  updateBook: (bookId: string, data: Partial<Book>) => void;
 }
 
 const BookContext = createContext<BookContextType | undefined>(undefined);
@@ -54,7 +55,7 @@ export function BookProvider({ children }: { children: ReactNode }) {
 
   const addBook = (book: Book) => {
     setBooks(prevBooks => {
-      const newBooks = [book, ...prevBooks];
+      const newBooks = [{ ...book, remarks: [] }, ...prevBooks];
       saveBooks(newBooks);
       return newBooks;
     });
@@ -76,8 +77,16 @@ export function BookProvider({ children }: { children: ReactNode }) {
     return books.find(b => b.id === id);
   };
 
+  const updateBook = (bookId: string, data: Partial<Book>) => {
+    setBooks(prev => {
+        const newBooks = prev.map(book => book.id === bookId ? { ...book, ...data } : book);
+        saveBooks(newBooks);
+        return newBooks;
+    });
+  };
+
   return (
-    <BookContext.Provider value={{ books, addBook, deleteBook, findBookById }}>
+    <BookContext.Provider value={{ books, addBook, deleteBook, findBookById, updateBook }}>
       {children}
     </BookContext.Provider>
   );
