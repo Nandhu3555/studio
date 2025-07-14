@@ -9,7 +9,7 @@ export type Book = {
   data_ai_hint: string;
   likes: number;
   dislikes: number;
-  pdfUrl: string;
+  documentUrl: string;
   summary?: string;
   year: number;
   rating: number;
@@ -69,7 +69,7 @@ export const books: Book[] = [
     data_ai_hint: "book cover",
     likes: 125,
     dislikes: 10,
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    documentUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
     summary: "This book provides a comprehensive introduction to the modern study of computer algorithms. It covers a broad range of algorithms in depth, yet makes their design and analysis accessible to all levels of readers.",
     year: 2010,
     rating: 4.5,
@@ -87,7 +87,7 @@ export const books: Book[] = [
     data_ai_hint: "gears machinery",
     likes: 98,
     dislikes: 5,
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    documentUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
     summary: "Shigley's Mechanical Engineering Design is the standard for teaching students the theory and practice of mechanical design. The book provides a solid foundation in the concepts of design and analysis.",
     year: 2014,
     rating: 4.7,
@@ -105,7 +105,7 @@ export const books: Book[] = [
     data_ai_hint: "circuit board",
     likes: 150,
     dislikes: 8,
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    documentUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
     summary: "This market-leading textbook continues its standard of excellence and innovation by building on the solid pedagogical foundation that instructors expect from Adel S. Sedra and Kenneth C. Smith.",
     year: 2015,
     rating: 4.6,
@@ -123,7 +123,7 @@ export const books: Book[] = [
     data_ai_hint: "bridge architecture",
     likes: 77,
     dislikes: 12,
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    documentUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
     summary: "Structural Analysis is a textbook that provides students with a clear and thorough presentation of the theory and application of structural analysis as it applies to trusses, beams, and frames.",
     year: 2011,
     rating: 4.4,
@@ -141,7 +141,7 @@ export const books: Book[] = [
     data_ai_hint: "math equations",
     likes: 210,
     dislikes: 3,
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    documentUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
     summary: "This market-leading text is known for its comprehensive coverage, careful and correct mathematics, outstanding exercises, and self-contained subject matter parts for maximum flexibility.",
     year: 2011,
     rating: 4.8,
@@ -159,7 +159,7 @@ export const books: Book[] = [
     data_ai_hint: "code computer",
     likes: 300,
     dislikes: 2,
-    pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    documentUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
     summary: "Often referred to as K&R, this book is a classic in the field of computer science. It provides a complete guide to the C programming language, with an emphasis on system programming.",
     year: 1988,
     rating: 4.9,

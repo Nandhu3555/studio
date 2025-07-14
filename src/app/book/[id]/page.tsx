@@ -151,7 +151,7 @@ export default function BookDetailPage() {
             </Link>
           </Button>
           <Button asChild size="lg" variant="secondary" className="md:col-span-1">
-            <a href={book.pdfUrl} download={`${book.title}.pdf`}>
+            <a href={book.documentUrl} download={`${book.title}.pdf`}>
               <Download className="mr-2 h-4 w-4" /> Download
             </a>
           </Button>

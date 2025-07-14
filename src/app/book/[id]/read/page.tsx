@@ -59,8 +59,8 @@ export default function ReadBookPage() {
             </header>
             <main className="flex-1">
                 <iframe
-                    src={book.pdfUrl}
-                    title={`PDF viewer for ${book.title}`}
+                    src={book.documentUrl}
+                    title={`Document viewer for ${book.title}`}
                     className="w-full h-full border-0"
                 />
             </main>

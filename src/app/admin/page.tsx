@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
@@ -22,6 +23,14 @@ import { useCategories } from "@/context/CategoryContext";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 5000000; // 5MB
+const ACCEPTED_DOC_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+];
+
 
 const uploadBookSchema = z.object({
   bookTitle: z.string().min(3, "Title must be at least 3 characters"),
@@ -37,7 +46,13 @@ const uploadBookSchema = z.object({
       (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
       ".jpg, .jpeg, .png and .webp files are accepted."
     ),
-  pdfFile: z.any().refine((files) => files?.length === 1, "A PDF file is required."),
+  documentFile: z
+    .any()
+    .refine((files) => files?.length === 1, "A document file is required.")
+    .refine(
+      (files) => ACCEPTED_DOC_TYPES.includes(files?.[0]?.type),
+      "Only .pdf, .doc, .docx, .ppt, .pptx files are accepted."
+    ),
 });
 type UploadBookValues = z.infer<typeof uploadBookSchema>;
 
@@ -192,16 +207,16 @@ function UploadBookForm() {
       category: "",
       year: undefined,
       imageFile: undefined,
-      pdfFile: undefined,
+      documentFile: undefined,
     },
   });
 
   async function onSubmit(values: UploadBookValues) {
     setLoading(true);
     try {
-      const [imageUrl, pdfUrl] = await Promise.all([
+      const [imageUrl, documentUrl] = await Promise.all([
         fileToDataUrl(values.imageFile[0]),
-        fileToDataUrl(values.pdfFile[0]),
+        fileToDataUrl(values.documentFile[0]),
       ]);
 
       const newBook: Book = {
@@ -215,7 +230,7 @@ function UploadBookForm() {
           data_ai_hint: "",
           likes: 0,
           dislikes: 0,
-          pdfUrl: pdfUrl,
+          documentUrl: documentUrl,
           rating: parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
           language: "English",
           pages: Math.floor(Math.random() * 300) + 200,
@@ -329,12 +344,12 @@ function UploadBookForm() {
             />
             <FormField
               control={form.control}
-              name="pdfFile"
+              name="documentFile"
               render={({ field }) => (
                  <FormItem>
-                    <FormLabel>PDF File</FormLabel>
+                    <FormLabel>Book Document</FormLabel>
                     <FormControl>
-                        <Input type="file" accept=".pdf" onChange={(e) => field.onChange(e.target.files)} />
+                        <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" onChange={(e) => field.onChange(e.target.files)} />
                     </FormControl>
                     <FormMessage />
                  </FormItem>
