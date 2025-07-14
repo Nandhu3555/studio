@@ -54,7 +54,9 @@ export default function Home() {
                         Explore Books <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button size="lg" variant="outline">Learn More</Button>
+                    <Button size="lg" variant="outline" asChild>
+                      <Link href="/learn-more">Learn More</Link>
+                    </Button>
                   </div>
               </div>
               <div className="hidden md:block">
