@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -27,51 +28,78 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <header className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-bold font-headline text-primary tracking-tight">
-          Your Digital Library
-        </h1>
-        <p className="mt-6 text-lg text-muted-foreground max-w-3xl mx-auto">
-          Discover a world of knowledge. Find textbooks, references, and more for your B.Tech studies, all in one place.
-        </p>
-      </header>
+      <section className="relative text-center md:text-left py-16 md:py-24 rounded-lg overflow-hidden mb-12">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent"></div>
+          <div className="absolute inset-0 bg-grid-slate-900/[0.04] bg-[bottom_1px_center] dark:bg-grid-slate-400/[0.05] dark:bg-bottom dark:border-b dark:border-slate-100/5" style={{ maskImage: 'linear-gradient(to_bottom, transparent, black)' }}></div>
 
-      <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input 
-            placeholder="Search by title or author..." 
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-      
-      <div className="flex flex-wrap justify-center gap-2 mb-10">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={activeCategory === category ? "default" : "outline"}
-            onClick={() => setActiveCategory(category)}
-            className="rounded-full transition-all duration-300"
-          >
-            {category}
-          </Button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {filteredBooks.map((book) => (
-          <BookCard key={book.id} book={book} />
-        ))}
-      </div>
-      {filteredBooks.length === 0 && (
-          <div className="col-span-full text-center py-16">
-            <h3 className="text-2xl font-headline font-semibold">No Books Found</h3>
-            <p className="text-muted-foreground mt-2">Try adjusting your search or category filter.</p>
+          <div className="relative grid md:grid-cols-2 gap-8 items-center">
+              <div className="space-y-6">
+                  <h1 className="text-4xl md:text-6xl font-bold font-headline text-primary tracking-tight">
+                      Your Digital Library
+                  </h1>
+                  <p className="text-lg text-muted-foreground max-w-xl mx-auto md:mx-0">
+                      Discover a world of knowledge. Find textbooks, references, and more for your B.Tech studies, all in one place.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <Button size="lg" asChild>
+                      <Link href="#browse">
+                        Explore Books
+                      </Link>
+                    </Button>
+                    <Button size="lg" variant="outline">Learn More</Button>
+                  </div>
+              </div>
+              <div className="hidden md:block">
+                  <Image
+                      src="https://placehold.co/600x400"
+                      alt="A collection of books"
+                      width={600}
+                      height={400}
+                      className="rounded-lg shadow-2xl transform transition-transform duration-500 hover:scale-105"
+                      data-ai-hint="books library"
+                  />
+              </div>
           </div>
-      )}
+      </section>
+
+      <section id="browse" className="scroll-mt-20">
+        <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input 
+              placeholder="Search by title or author..." 
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap justify-center gap-2 mb-10">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={activeCategory === category ? "default" : "outline"}
+              onClick={() => setActiveCategory(category)}
+              className="rounded-full transition-all duration-300"
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {filteredBooks.map((book) => (
+            <BookCard key={book.id} book={book} />
+          ))}
+        </div>
+        {filteredBooks.length === 0 && (
+            <div className="col-span-full text-center py-16">
+              <h3 className="text-2xl font-headline font-semibold">No Books Found</h3>
+              <p className="text-muted-foreground mt-2">Try adjusting your search or category filter.</p>
+            </div>
+        )}
+      </section>
     </div>
   );
 }
