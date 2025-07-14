@@ -177,10 +177,10 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent>
                         <a 
-                            href="mailto:gnreddy355@gmail.com" 
+                            href="mailto:gnreddy3555@gmail.com" 
                             className="text-sm font-medium text-primary hover:underline"
                         >
-                            gnreddy355@gmail.com
+                            gnreddy3555@gmail.com
                         </a>
                     </CardContent>
                 </Card>
