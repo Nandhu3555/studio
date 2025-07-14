@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -10,10 +11,12 @@ import { BookOpen } from "lucide-react";
 import { useUsers } from "@/context/UserContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { categories } from "@/lib/mock-data";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { addUser } = useUsers();
+  const { addUser, findUserByEmail } = useUsers();
   const { login } = useAuth();
   const { toast } = useToast();
 
@@ -23,15 +26,32 @@ export default function SignupPage() {
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const branch = formData.get('branch') as string;
+    const year = formData.get('year') as string;
 
-    if (name && email && password) {
-      addUser({ name, email });
-      login(email, 'student');
+    if (findUserByEmail(email)) {
+        toast({
+            variant: "destructive",
+            title: "Account Exists",
+            description: "An account with this email already exists. Please login.",
+        });
+        return;
+    }
+
+    if (name && email && password && branch && year) {
+      const newUser = addUser({ name, email, branch, year: parseInt(year) });
+      login(newUser.email, 'student');
       toast({
         title: "Account Created!",
         description: "Welcome to B-Tech Lib.",
       });
       router.push('/');
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Missing Information",
+            description: "Please fill out all fields to create an account.",
+        });
     }
   };
   
@@ -64,6 +84,33 @@ export default function SignupPage() {
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input id="password" name="password" type="password" required />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="branch">Branch</Label>
+                <Select name="branch" required>
+                    <SelectTrigger id="branch">
+                        <SelectValue placeholder="Select your branch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {categories.filter(c => c !== "All" && c !== "Mathematics").map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="year">Year of Study</Label>
+                <Select name="year" required>
+                    <SelectTrigger id="year">
+                        <SelectValue placeholder="Select your year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="1">1st Year</SelectItem>
+                        <SelectItem value="2">2nd Year</SelectItem>
+                        <SelectItem value="3">3rd Year</SelectItem>
+                        <SelectItem value="4">4th Year</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
             <Button type="submit" className="w-full">
               Create Account

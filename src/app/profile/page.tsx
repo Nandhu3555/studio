@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
@@ -8,6 +9,7 @@ import { Loader2, LogOut, Moon, Sun, Laptop } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useTheme } from "@/context/ThemeContext";
+import { format } from "date-fns";
 
 export default function ProfilePage() {
     const { user, isLoggedIn, isAdmin, logout, isAuthReady } = useAuth();
@@ -33,6 +35,8 @@ export default function ProfilePage() {
         .map(n => n[0])
         .join('')
         .toUpperCase();
+        
+    const memberSince = user.createdAt ? format(new Date(user.createdAt), "MMMM yyyy") : 'N/A';
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -52,7 +56,7 @@ export default function ProfilePage() {
                     <CardHeader>
                         <CardTitle className="text-lg font-headline">Account Information</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="space-y-2 text-sm">
                         <div className="flex justify-between items-center">
                             <span className="text-muted-foreground">Name</span>
                             <span>{user.name}</span>
@@ -65,6 +69,22 @@ export default function ProfilePage() {
                             <span className="text-muted-foreground">Role</span>
                             <span className="font-semibold text-primary">{isAdmin ? 'Admin' : 'Student'}</span>
                         </div>
+                        {!isAdmin && (
+                            <>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Branch</span>
+                                    <span>{user.branch || 'Not specified'}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Year</span>
+                                    <span>{user.year || 'Not specified'}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Member Since</span>
+                                    <span>{memberSince}</span>
+                                </div>
+                            </>
+                        )}
                     </CardContent>
                 </Card>
 

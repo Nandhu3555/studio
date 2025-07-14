@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
@@ -5,7 +6,8 @@ import { users as initialUsers, type User } from '@/lib/mock-data';
 
 interface UserContextType {
   users: User[];
-  addUser: (user: Omit<User, 'id' | 'createdAt'>) => void;
+  addUser: (user: Omit<User, 'id' | 'createdAt'>) => User;
+  findUserByEmail: (email: string) => User | undefined;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -48,10 +50,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
         createdAt: new Date(),
     };
     setUsers(prevUsers => [newUser, ...prevUsers]);
+    return newUser;
+  };
+  
+  const findUserByEmail = (email: string): User | undefined => {
+    return users.find(u => u.email.toLowerCase() === email.toLowerCase());
   };
 
   return (
-    <UserContext.Provider value={{ users, addUser }}>
+    <UserContext.Provider value={{ users, addUser, findUserByEmail }}>
       {children}
     </UserContext.Provider>
   );

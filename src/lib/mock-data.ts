@@ -1,3 +1,4 @@
+
 export type Book = {
   id: string;
   title: string;
@@ -22,6 +23,8 @@ export type User = {
     name: string;
     email: string;
     createdAt: Date;
+    branch: string;
+    year: number;
 };
 
 export type Activity = {
@@ -42,9 +45,9 @@ export const categories = [
 ];
 
 export const users: User[] = [
-    { id: '1', name: 'John Doe', email: 'john.d@example.com', createdAt: new Date('2024-07-26T10:00:00Z') },
-    { id: '2', name: 'Emily Davis', email: 'emily.d@example.com', createdAt: new Date('2024-07-28T14:30:00Z') },
-    { id: '3', name: 'Jane Smith', email: 'jane.s@example.com', createdAt: new Date('2024-07-29T09:00:00Z') },
+    { id: '1', name: 'John Doe', email: 'john.d@example.com', createdAt: new Date('2024-07-26T10:00:00Z'), branch: 'Computer Science', year: 3 },
+    { id: '2', name: 'Emily Davis', email: 'emily.d@example.com', createdAt: new Date('2024-07-28T14:30:00Z'), branch: 'Mechanical', year: 2 },
+    { id: '3', name: 'Jane Smith', email: 'jane.s@example.com', createdAt: new Date('2024-07-29T09:00:00Z'), branch: 'Electronics', year: 4 },
 ];
 
 export const recentActivity: Activity[] = [
