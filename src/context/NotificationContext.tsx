@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { type Notification as NotificationType } from '@/lib/mock-data';
 
 interface NotificationContextType {
@@ -12,33 +12,45 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 const NOTIFICATIONS_STORAGE_KEY = 'btechlib_notifications';
+const notificationChannel = typeof window !== 'undefined' ? new BroadcastChannel('notifications') : null;
+
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
+  const loadNotificationsFromStorage = useCallback(() => {
     try {
       const storedNotifications = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
       if (storedNotifications) {
-        setNotifications(JSON.parse(storedNotifications));
+        const parsedNotifications = JSON.parse(storedNotifications);
+        setNotifications(parsedNotifications.map((n: any) => ({...n, timestamp: new Date(n.timestamp)})));
       }
     } catch (error) {
       console.error("Could not access local storage for notifications:", error);
-    } finally {
-        setIsLoaded(true);
     }
   }, []);
 
   useEffect(() => {
-    if (isLoaded) {
-      try {
-        localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
-      } catch (error) {
-        console.error("Could not write to local storage for notifications:", error);
-      }
-    }
-  }, [notifications, isLoaded]);
+    loadNotificationsFromStorage();
+
+    const handleMessage = (event: MessageEvent) => {
+        if (event.data.type === 'NOTIFICATION_CHANGE') {
+            loadNotificationsFromStorage();
+        }
+    };
+    
+    notificationChannel?.addEventListener('message', handleMessage);
+
+    return () => {
+        notificationChannel?.removeEventListener('message', handleMessage);
+    };
+
+  }, [loadNotificationsFromStorage]);
+
+  const notifyChange = () => {
+    notificationChannel?.postMessage({ type: 'NOTIFICATION_CHANGE' });
+  };
+
 
   const addNotification = (notification: Omit<NotificationType, 'id' | 'timestamp' | 'read'>) => {
     const newNotification: NotificationType = {
@@ -47,7 +59,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         timestamp: new Date(),
         read: false,
     };
-    setNotifications(prev => [newNotification, ...prev]);
+    
+    setNotifications(prev => {
+        const updatedNotifications = [newNotification, ...prev];
+        try {
+            localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(updatedNotifications));
+            notifyChange();
+        } catch (error) {
+            console.error("Could not write to local storage for notifications:", error);
+        }
+        return updatedNotifications;
+    });
   };
   
   return (
