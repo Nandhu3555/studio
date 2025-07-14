@@ -12,15 +12,22 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input";
 import { ThumbsUp, ThumbsDown, Search, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+
+const studyYears = [
+  "All Years", "1st Year", "2nd Year", "3rd Year", "4th Year"
+];
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [activeYear, setActiveYear] = useState("All Years");
   const [searchTerm, setSearchTerm] = useState("");
   const { books } = useBooks();
   const { categories } = useCategories();
 
   const filteredBooks = books
     .filter((book) => activeCategory === "All" || book.category === activeCategory)
+    .filter((book) => activeYear === "All Years" || book.studyYear === parseInt(activeYear))
     .filter((book) =>
       book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.author.toLowerCase().includes(searchTerm.toLowerCase())
@@ -75,17 +82,32 @@ export default function Home() {
           </div>
         </div>
         
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={activeCategory === category ? "default" : "outline"}
-              onClick={() => setActiveCategory(category)}
-              className="rounded-full transition-all duration-300"
-            >
-              {category}
-            </Button>
-          ))}
+        <div className="flex flex-col items-center gap-4 mb-10">
+            <div className="flex flex-wrap justify-center gap-2">
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={activeCategory === category ? "default" : "outline"}
+                  onClick={() => setActiveCategory(category)}
+                  className="rounded-full transition-all duration-300"
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+            <Separator className="w-1/2 mx-auto my-2" />
+             <div className="flex flex-wrap justify-center gap-2">
+              {studyYears.map((year) => (
+                <Button
+                  key={year}
+                  variant={activeYear === year ? "secondary" : "outline"}
+                  onClick={() => setActiveYear(year)}
+                  className="rounded-full transition-all duration-300"
+                >
+                  {year}
+                </Button>
+              ))}
+            </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -96,7 +118,7 @@ export default function Home() {
         {filteredBooks.length === 0 && (
             <div className="col-span-full text-center py-16">
               <h3 className="text-2xl font-headline font-semibold">No Books Found</h3>
-              <p className="text-muted-foreground mt-2">Try adjusting your search or category filter.</p>
+              <p className="text-muted-foreground mt-2">Try adjusting your search or filter criteria.</p>
             </div>
         )}
       </section>

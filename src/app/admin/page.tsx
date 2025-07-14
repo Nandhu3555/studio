@@ -36,6 +36,7 @@ const uploadBookSchema = z.object({
   bookTitle: z.string().min(3, "Title must be at least 3 characters"),
   bookAuthor: z.string().min(3, "Author must be at least 3 characters"),
   year: z.coerce.number().min(1000, "Please enter a valid year").max(new Date().getFullYear(), "Year cannot be in the future"),
+  studyYear: z.string().min(1, "Please select a study year"),
   bookDescription: z.string().min(10, "Description must be at least 10 characters"),
   category: z.string().min(1, "Please select a category"),
   imageFile: z
@@ -206,6 +207,7 @@ function UploadBookForm() {
       bookDescription: "",
       category: "",
       year: undefined,
+      studyYear: "",
       imageFile: undefined,
       documentFile: undefined,
     },
@@ -224,6 +226,7 @@ function UploadBookForm() {
           title: values.bookTitle,
           author: values.bookAuthor,
           year: values.year,
+          studyYear: parseInt(values.studyYear),
           description: values.bookDescription,
           category: values.category,
           imageUrl: imageUrl,
@@ -285,17 +288,42 @@ function UploadBookForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="year"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Publication Year</FormLabel>
-                  <FormControl><Input type="number" placeholder={`e.g. ${new Date().getFullYear()}`} {...field} value={field.value ?? ''} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Publication Year</FormLabel>
+                      <FormControl><Input type="number" placeholder={`e.g. ${new Date().getFullYear()}`} {...field} value={field.value ?? ''} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="studyYear"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Study Year</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a year" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="1">1st Year</SelectItem>
+                                <SelectItem value="2">2nd Year</SelectItem>
+                                <SelectItem value="3">3rd Year</SelectItem>
+                                <SelectItem value="4">4th Year</SelectItem>
+                            </SelectContent>
+                        </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
             <FormField
               control={form.control}
               name="bookDescription"
