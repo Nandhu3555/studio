@@ -7,7 +7,7 @@ import { type Book } from '@/lib/mock-data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bookmark, Share2, Star, Download } from 'lucide-react';
+import { ArrowLeft, Bookmark, Share2, Star, Download, BookOpen } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBooks } from '@/context/BookContext';
@@ -168,9 +168,9 @@ export default function BookDetailPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Button asChild size="lg" className="md:col-span-1">
-            <Link href={`/book/${book.id}/read`}>
-              Read Book
-            </Link>
+            <a href={book.documentUrl} download={`${book.title}.${fileExtension}`}>
+                <BookOpen className="mr-2 h-4 w-4" /> Read Book
+            </a>
           </Button>
           <Button asChild size="lg" variant="secondary" className="md:col-span-1">
             <a href={book.documentUrl} download={`${book.title}.${fileExtension}`}>
