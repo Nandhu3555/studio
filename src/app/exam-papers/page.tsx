@@ -3,13 +3,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, FileText, BookOpen } from "lucide-react";
+import { Download, FileText, BookOpen, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useQuestionPapers } from "@/context/QuestionPaperContext";
 import { type QuestionPaper } from "@/lib/mock-data";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
 
 const branches = ["All", "Computer Science", "Mechanical", "Electronics", "Civil"];
 const studyYears = ["All", "1st Year", "2nd Year", "3rd Year", "4th Year"];
@@ -24,6 +25,8 @@ export default function ExamPapersPage() {
   const { toast } = useToast();
   const [activeBranch, setActiveBranch] = useState("All");
   const [activeYear, setActiveYear] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   const handleDownload = (paper: { documentUrl: string, subject: string }) => {
     if (!paper.documentUrl) {
@@ -49,7 +52,8 @@ export default function ExamPapersPage() {
   
   const filteredPapers = papers
     .filter(paper => activeBranch === "All" || paper.branch === activeBranch)
-    .filter(paper => activeYear === "All" || paper.studyYear === activeYear);
+    .filter(paper => activeYear === "All" || paper.studyYear === activeYear)
+    .filter(paper => paper.subject.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -60,6 +64,18 @@ export default function ExamPapersPage() {
         </p>
       </div>
       
+       <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input 
+              placeholder="Search by subject..." 
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
       <div className="flex flex-col items-center gap-4 mb-10">
             <div className="flex flex-wrap justify-center gap-2">
               {branches.map((branch) => (
