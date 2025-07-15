@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             id: 'admin',
             name: 'Admin User', 
             email, 
+            password: 'nandhu@sunny', // This is just for the prototype
             createdAt: new Date(),
             branch: 'Administration',
             year: 0,

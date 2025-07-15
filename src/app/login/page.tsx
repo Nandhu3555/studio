@@ -48,11 +48,9 @@ export default function LoginPage() {
   const onStudentSubmit = (values: StudentLoginValues) => {
     const user = findUserByEmail(values.email);
 
-    // In a real app, you would have a secure password hashing and comparison mechanism.
-    // For this prototype, we'll check against a mock password.
-    if (user && values.password === "password123") {
+    if (user && user.password === values.password) {
       login(values.email, 'student');
-      toast({ title: "Login Successful", description: "Welcome back, student!" });
+      toast({ title: "Login Successful", description: "Welcome back!" });
       router.push('/');
     } else {
         toast({
@@ -102,7 +100,7 @@ export default function LoginPage() {
             <Card className="animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-500">
               <CardHeader>
                 <CardTitle className="font-headline">Student Login</CardTitle>
-                <CardDescription>Enter your credentials to access the library. (Hint: Use 'password123' for any student)</CardDescription>
+                <CardDescription>Enter your credentials to access the library.</CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...studentForm}>

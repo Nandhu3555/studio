@@ -97,7 +97,13 @@ export default function SignupPage() {
     const otp = formData.get('otp') as string;
 
     if (otp === generatedOtp && userDetails) {
-      const newUser = addUser({ name: userDetails.name, email: userDetails.email, branch: userDetails.branch, year: parseInt(userDetails.year) });
+      const newUser = addUser({ 
+          name: userDetails.name, 
+          email: userDetails.email, 
+          password: userDetails.password, 
+          branch: userDetails.branch, 
+          year: parseInt(userDetails.year) 
+      });
       login(newUser.email, 'student');
       addNotification({
         type: 'new_user',

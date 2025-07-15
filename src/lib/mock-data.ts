@@ -33,6 +33,7 @@ export type User = {
     id: string;
     name: string;
     email: string;
+    password: string;
     createdAt: Date;
     branch: string;
     year: number;
@@ -78,9 +79,9 @@ export const categories = [
 ];
 
 export const users: User[] = [
-    { id: '1', name: 'John Doe', email: 'john.d@example.com', createdAt: new Date('2024-07-26T10:00:00Z'), branch: 'Computer Science', year: 3 },
-    { id: '2', name: 'Emily Davis', email: 'emily.d@example.com', createdAt: new Date('2024-07-28T14:30:00Z'), branch: 'Mechanical', year: 2 },
-    { id: '3', name: 'Jane Smith', email: 'jane.s@example.com', createdAt: new Date('2024-07-29T09:00:00Z'), branch: 'Electronics', year: 4 },
+    { id: '1', name: 'John Doe', email: 'john.d@example.com', password: 'password123', createdAt: new Date('2024-07-26T10:00:00Z'), branch: 'Computer Science', year: 3 },
+    { id: '2', name: 'Emily Davis', email: 'emily.d@example.com', password: 'password123', createdAt: new Date('2024-07-28T14:30:00Z'), branch: 'Mechanical', year: 2 },
+    { id: '3', name: 'Jane Smith', email: 'jane.s@example.com', password: 'password123', createdAt: new Date('2024-07-29T09:00:00Z'), branch: 'Electronics', year: 4 },
 ];
 
 export const recentActivity: Activity[] = [
