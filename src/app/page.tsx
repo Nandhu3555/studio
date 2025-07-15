@@ -61,12 +61,12 @@ export default function Home() {
               </div>
               <div className="hidden md:block">
                   <Image
-                      src="https://placehold.co/600x400"
-                      alt="A collection of books"
+                      src="https://placehold.co/600x400.png"
+                      alt="A collection of books on a shelf in a library"
                       width={600}
                       height={400}
                       className="rounded-lg shadow-2xl transform transition-transform duration-500 hover:scale-105"
-                      data-ai-hint="books library"
+                      data-ai-hint="library bookshelf"
                   />
               </div>
           </div>
