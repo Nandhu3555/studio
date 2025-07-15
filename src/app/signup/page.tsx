@@ -75,7 +75,7 @@ export default function SignupPage() {
         setStep('otp');
         toast({
             title: "OTP Sent!",
-            description: "An OTP has been 'sent' to your email. Check the console for the code.",
+            description: `For testing, your OTP is: ${otp}`,
             duration: 9000,
         });
     } catch (error) {
