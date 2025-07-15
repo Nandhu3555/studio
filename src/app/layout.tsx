@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +10,7 @@ import { CategoryProvider } from '@/context/CategoryContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { QuestionPaperProvider } from '@/context/QuestionPaperContext';
+import { BranchProvider } from '@/context/BranchContext';
 
 export const metadata: Metadata = {
   title: 'B-Tech Lib',
@@ -38,13 +40,15 @@ export default function RootLayout({
               <AuthProvider>
                 <BookProvider>
                   <CategoryProvider>
-                    <QuestionPaperProvider>
-                      <NotificationProvider>
-                        <Header />
-                        <main className="py-4">{children}</main>
-                        <Toaster />
-                      </NotificationProvider>
-                    </QuestionPaperProvider>
+                    <BranchProvider>
+                      <QuestionPaperProvider>
+                        <NotificationProvider>
+                          <Header />
+                          <main className="py-4">{children}</main>
+                          <Toaster />
+                        </NotificationProvider>
+                      </QuestionPaperProvider>
+                    </BranchProvider>
                   </CategoryProvider>
                 </BookProvider>
               </AuthProvider>

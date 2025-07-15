@@ -11,8 +11,8 @@ import { useQuestionPapers } from "@/context/QuestionPaperContext";
 import { type QuestionPaper } from "@/lib/mock-data";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { useBranches } from "@/context/BranchContext";
 
-const branches = ["All", "Computer Science", "Mechanical", "Electronics", "Civil"];
 const studyYears = ["All", "1st Year", "2nd Year", "3rd Year", "4th Year"];
 
 const getMimeTypeFromDataUrl = (dataUrl: string): string => {
@@ -22,6 +22,7 @@ const getMimeTypeFromDataUrl = (dataUrl: string): string => {
 
 export default function ExamPapersPage() {
   const { papers } = useQuestionPapers();
+  const { branches } = useBranches();
   const { toast } = useToast();
   const [activeBranch, setActiveBranch] = useState("All");
   const [activeYear, setActiveYear] = useState("All");

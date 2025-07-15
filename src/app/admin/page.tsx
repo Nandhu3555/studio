@@ -24,6 +24,7 @@ import { useNotifications } from "@/context/NotificationContext";
 import { useQuestionPapers } from "@/context/QuestionPaperContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useBranches } from "@/context/BranchContext";
 
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -66,6 +67,11 @@ const addCategorySchema = z.object({
     categoryName: z.string().min(3, "Category name must be at least 3 characters"),
 });
 type AddCategoryValues = z.infer<typeof addCategorySchema>;
+
+const addBranchSchema = z.object({
+    branchName: z.string().min(3, "Branch name must be at least 3 characters"),
+});
+type AddBranchValues = z.infer<typeof addBranchSchema>;
 
 const uploadPaperSchema = z.object({
   subject: z.string().min(3, "Subject must be at least 3 characters"),
@@ -151,7 +157,10 @@ function AdminDashboard() {
                     <ManageBooksCard />
                     <ManageCategoriesCard />
                  </div>
-                <ManageQuestionPapersCard />
+                 <div className="grid md:grid-cols-2 gap-8">
+                    <ManageQuestionPapersCard />
+                    <ManageBranchesCard />
+                </div>
             </div>
             <div className="lg:col-span-1">
                 <ManageUsersCard />
@@ -385,7 +394,7 @@ function UploadBookForm() {
 
 function UploadExamPaperForm() {
     const { addPaper } = useQuestionPapers();
-    const { categories } = useCategories();
+    const { branches } = useBranches();
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
 
@@ -531,8 +540,8 @@ function UploadExamPaperForm() {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {categories.filter(c => c !== "All" && c !== "Mathematics").map(cat => (
-                                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                                {branches.filter(b => b !== "All").map(branch => (
+                                                    <SelectItem key={branch} value={branch}>{branch}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -649,7 +658,7 @@ function ManageCategoriesCard() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="font-headline">Manage Categories</CardTitle>
+                <CardTitle className="font-headline">Manage Book Categories</CardTitle>
                 <CardDescription>Add or delete book categories.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -683,6 +692,68 @@ function ManageCategoriesCard() {
                                 <TableCell className="font-medium">{category}</TableCell>
                                 <TableCell className="text-right">
                                     <Button variant="ghost" size="icon" onClick={() => deleteCategory(category)}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                        <span className="sr-only">Delete</span>
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
+}
+
+function ManageBranchesCard() {
+    const { branches, addBranch, deleteBranch } = useBranches();
+    const form = useForm<AddBranchValues>({
+        resolver: zodResolver(addBranchSchema),
+        defaultValues: { branchName: "" },
+    });
+
+    function onSubmit(values: AddBranchValues) {
+        addBranch(values.branchName);
+        form.reset();
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline">Manage Exam Branches</CardTitle>
+                <CardDescription>Add or delete exam paper branches.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-start gap-2 mb-4">
+                        <FormField
+                            control={form.control}
+                            name="branchName"
+                            render={({ field }) => (
+                                <FormItem className="flex-grow">
+                                    <FormControl><Input placeholder="New branch name..." {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" size="icon" aria-label="Add branch">
+                            <PlusCircle className="h-5 w-5" />
+                        </Button>
+                    </form>
+                </Form>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Branch Name</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {branches.filter(b => b !== "All").map(branch => (
+                            <TableRow key={branch}>
+                                <TableCell className="font-medium">{branch}</TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="ghost" size="icon" onClick={() => deleteBranch(branch)}>
                                         <Trash2 className="h-4 w-4 text-destructive" />
                                         <span className="sr-only">Delete</span>
                                     </Button>
