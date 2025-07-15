@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { BookOpen, Shield } from "lucide-react";
+import { useUsers } from "@/context/UserContext";
 
 const studentLoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,6 +32,7 @@ type AdminLoginValues = z.infer<typeof adminLoginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { findUserByEmail } = useUsers();
   const { toast } = useToast();
 
   const studentForm = useForm<StudentLoginValues>({
@@ -44,10 +46,21 @@ export default function LoginPage() {
   });
 
   const onStudentSubmit = (values: StudentLoginValues) => {
-    // Mock student login
-    login(values.email, 'student');
-    toast({ title: "Login Successful", description: "Welcome back, student!" });
-    router.push('/');
+    const user = findUserByEmail(values.email);
+
+    // In a real app, you would have a secure password hashing and comparison mechanism.
+    // For this prototype, we'll check against a mock password.
+    if (user && values.password === "password123") {
+      login(values.email, 'student');
+      toast({ title: "Login Successful", description: "Welcome back, student!" });
+      router.push('/');
+    } else {
+        toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Invalid email or password.",
+      });
+    }
   };
 
   const onAdminSubmit = (values: AdminLoginValues) => {
@@ -89,7 +102,7 @@ export default function LoginPage() {
             <Card className="animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-500">
               <CardHeader>
                 <CardTitle className="font-headline">Student Login</CardTitle>
-                <CardDescription>Enter your credentials to access the library.</CardDescription>
+                <CardDescription>Enter your credentials to access the library. (Hint: Use 'password123' for any student)</CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...studentForm}>
