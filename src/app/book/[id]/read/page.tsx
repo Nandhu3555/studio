@@ -25,12 +25,12 @@ export default function ReadBookPage() {
             } else {
                 const foundBook = findBookById(bookId);
                 setBook(foundBook || null);
+                setIsLoading(false);
             }
-            setIsLoading(false);
         }
     }, [bookId, findBookById, isAuthReady, isLoggedIn, router]);
 
-    if (isLoading) {
+    if (isLoading || !isAuthReady) {
         return (
             <div className="flex h-screen w-full items-center justify-center bg-background">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -88,4 +88,3 @@ export default function ReadBookPage() {
         </div>
     );
 }
-

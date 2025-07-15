@@ -25,12 +25,12 @@ export default function ReadPaperPage() {
             } else {
                 const foundPaper = papers.find(p => p.id === paperId) || null;
                 setPaper(foundPaper);
+                setIsLoading(false);
             }
-            setIsLoading(false);
         }
     }, [paperId, papers, isAuthReady, isLoggedIn, router]);
 
-    if (isLoading) {
+    if (isLoading || !isAuthReady) {
         return (
             <div className="flex h-screen w-full items-center justify-center bg-background">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
