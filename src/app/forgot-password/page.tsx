@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
         setStep('reset');
         toast({
             title: "OTP Sent!",
-            description: "An OTP has been 'sent' to your email. Check the console for the preview link.",
+            description: "An OTP has been 'sent' to your email. Check the console for the code.",
             duration: 9000
         });
     } catch (error) {
