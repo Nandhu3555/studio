@@ -53,7 +53,7 @@ export default function LoginPage() {
       toast({ title: "Login Successful", description: "Welcome back!" });
       router.push('/');
     } else {
-        toast({
+      toast({
         variant: "destructive",
         title: "Login Failed",
         description: "Invalid email or password.",
@@ -122,7 +122,7 @@ export default function LoginPage() {
                                 </Button>
                             </Link>
                         </div>
-                        <FormControl><Input type="password" {...field} /></FormControl>
+                        <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )} />
@@ -164,7 +164,7 @@ export default function LoginPage() {
                                 </Button>
                             </Link>
                         </div>
-                        <FormControl><Input type="password" {...field} /></FormControl>
+                        <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )} />
