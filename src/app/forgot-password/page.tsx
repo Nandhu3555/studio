@@ -17,21 +17,13 @@ import { sendOtp } from "@/ai/flows/send-otp-flow";
 import { BookOpen, Loader2 } from "lucide-react";
 import { useUsers } from "@/context/UserContext";
 import { useNotifications } from "@/context/NotificationContext";
+import { Label } from "@/components/ui/label";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
 });
 type EmailValues = z.infer<typeof emailSchema>;
 
-const resetSchema = z.object({
-  otp: z.string().length(6, "OTP must be 6 digits."),
-  newPassword: z.string().min(6, "Password must be at least 6 characters."),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords do not match.",
-  path: ["confirmPassword"],
-});
-type ResetValues = z.infer<typeof resetSchema>;
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -47,11 +39,6 @@ export default function ForgotPasswordPage() {
   const emailForm = useForm<EmailValues>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "" },
-  });
-
-  const resetForm = useForm<ResetValues>({
-    resolver: zodResolver(resetSchema),
-    defaultValues: { otp: "", newPassword: "", confirmPassword: "" },
   });
 
   const handleEmailSubmit = async (values: EmailValues) => {
@@ -88,12 +75,28 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const handleResetSubmit = (values: ResetValues) => {
+  const handleResetSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsLoading(true);
-    if (values.otp === generatedOtp) {
+    const formData = new FormData(event.currentTarget);
+    const otp = formData.get('otp') as string;
+    const newPassword = formData.get('newPassword') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Passwords do not match",
+        description: "Please re-enter your new password.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (otp === generatedOtp) {
       // In a real app, you would now update the user's password in your database.
       // For this prototype, we'll just simulate success.
-      console.log(`Password for ${userEmail} has been reset to: ${values.newPassword}`);
+      console.log(`Password for ${userEmail} has been reset to: ${newPassword}`);
        addNotification({
         type: 'password_changed',
         title: 'Security Alert',
@@ -155,46 +158,23 @@ export default function ForgotPasswordPage() {
               </form>
             </Form>
           ) : (
-            <Form {...resetForm}>
-              <form onSubmit={resetForm.handleSubmit(handleResetSubmit)} className="space-y-4">
-                <FormField
-                  control={resetForm.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>One-Time Password (OTP)</FormLabel>
-                      <FormControl><Input placeholder="6-digit code" maxLength={6} {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={resetForm.control}
-                  name="newPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Password</FormLabel>
-                      <FormControl><Input type="password" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={resetForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm New Password</FormLabel>
-                      <FormControl><Input type="password" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Resetting...</> : "Reset Password"}
-                </Button>
-              </form>
-            </Form>
+            <form onSubmit={handleResetSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="otp">One-Time Password (OTP)</Label>
+                  <Input id="otp" name="otp" placeholder="6-digit code" maxLength={6} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input id="newPassword" name="newPassword" type="password" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input id="confirmPassword" name="confirmPassword" type="password" required />
+                </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Resetting...</> : "Reset Password"}
+              </Button>
+            </form>
           )}
           <div className="mt-4 text-center text-sm">
             Remembered your password?{" "}
