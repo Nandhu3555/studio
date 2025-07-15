@@ -7,7 +7,7 @@ import { type Book } from '@/lib/mock-data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bookmark, Share2, Star, Download, BookOpen, Send } from 'lucide-react';
+import { ArrowLeft, Bookmark, Star, Download, BookOpen, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBooks } from '@/context/BookContext';
@@ -16,6 +16,24 @@ import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+
+function WhatsAppIcon({ className }: { className?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            className={className}
+            fill="currentColor"
+        >
+            <path
+                d="M16.75 13.96c.25.42.42.88.5 1.39.08.51.08 1.05-.03 1.56-.13 1.14-.68 2.2-1.55 3.04-.87.84-1.93 1.39-3.08 1.55-1.14.16-2.31.03-3.38-.4-1.07-.43-2.05-.99-2.91-1.68l-3.33 1.11 1.12-3.27a11.1 11.1 0 0 1-1.95-3.32c-.44-1.15-.55-2.38-.3-3.56.24-1.18.8-2.29 1.6-3.23.81-.94 1.84-1.68 3-2.18s2.4-.73 3.69-.64c1.29.09 2.54.5 3.62 1.2s2.02 1.6 2.68 2.68c.66 1.08 1.03 2.3 1.1 3.55.07 1.25-.15 2.48-.64 3.62-.49 1.14-1.24 2.16-2.18 3.01zm-5.18-1.42c-.13 0-.26-.03-.38-.08-.12-.05-.24-.13-.35-.22-.11-.09-.23-.2-.34-.33s-.22-.29-.33-.45c-.11-.16-.21-.34-.3-.54s-.16-.4-.18-.63c-.02-.23.01-.46.08-.68.07-.22.19-.43.35-.61.16-.18.35-.34.56-.47.21-.13.44-.23.68-.28.24-.05.49-.06.73-.02.24.04.48.12.7.24.22.12.42.28.59.48.17.2.31.43.41.68s.15.52.14.79c-.01.27-.08.54-.21.79s-.31.48-.53.66c-.22.18-.48.31-.76.39-.28.08-.58.11-.88.08-.3-.03-.59-.11-.86-.23-.27-.12-.52-.28-.74-.48-.22-.2-.42-.44-.58-.71-.16-.27-.29-.56-.36-.87-.07-.31-.09-.62-.05-.93.04-.31.14-.61.29-.89.15-.28.35-.54.59-.75.24-.21.52-.39.82-.51.3-.12.62-.18.94-.18.32,0,.64.06.94.18.3.12.58.29.82.51.24.22.44.47.59.75.15.28.25.58.29.89.04.31.02.62-.05.93-.07.31-.19.6-.36.87-.16.27-.36.51-.58.71-.22.2-.47.36-.74.48-.27.12-.56.2-.86.23-.3.03-.6.01-.88-.08z"
+            ></path>
+        </svg>
+    );
+}
 
 
 function StarRating({ rating }: { rating: number }) {
@@ -85,32 +103,15 @@ export default function BookDetailPage() {
     }
   }, [bookId, findBookById]);
 
-  const fallbackShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({ title: "Link Copied!", description: "The link to this book has been copied to your clipboard." });
-  };
 
-  const handleShare = async () => {
-    if (navigator.share && book) {
-      try {
-        await navigator.share({
-          title: book.title,
-          text: `Check out this book: ${book.title} by ${book.author}`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        // This checks if the user cancelled the share dialog.
-        // We only fall back to clipboard copy if it's an actual error.
-        if (error instanceof DOMException && (error.name === "AbortError" || error.name === "NotAllowedError")) {
-          // User cancelled the share, do nothing.
-        } else {
-          console.error("Share failed, falling back to clipboard:", error);
-          fallbackShare();
-        }
-      }
-    } else {
-      fallbackShare();
-    }
+  const handleShare = () => {
+    if (!book) return;
+
+    const shareText = `Check out this book: "${book.title}" by ${book.author}`;
+    const shareUrl = window.location.href;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleRemarkSubmit = () => {
@@ -203,7 +204,7 @@ export default function BookDetailPage() {
             </a>
           </Button>
           <Button variant="outline" size="lg" onClick={handleShare} className="md:col-span-1">
-            <Share2 className="mr-2 h-4 w-4" /> Share
+            <WhatsAppIcon className="mr-2 h-5 w-5" /> Share
           </Button>
         </div>
         
