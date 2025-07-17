@@ -9,6 +9,13 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
+const isPdfUrl = (url: string): boolean => {
+    if (!url) return false;
+    if (url.startsWith('data:application/pdf')) return true;
+    if (url.toLowerCase().endsWith('.pdf')) return true;
+    return false;
+};
+
 export default function ReadBookPage() {
     const params = useParams();
     const router = useRouter();
@@ -52,9 +59,9 @@ export default function ReadBookPage() {
         );
     }
 
-    const isPdf = book.documentUrl && book.documentUrl.startsWith('data:application/pdf');
+    const canDisplayPdf = isPdfUrl(book.documentUrl);
 
-    if (!isPdf) {
+    if (!canDisplayPdf) {
          return (
             <div className="flex h-screen w-full flex-col items-center justify-center bg-background p-4">
                 <AlertTriangle className="h-16 w-16 text-destructive mb-4" />

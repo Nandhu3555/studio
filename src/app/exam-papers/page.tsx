@@ -15,9 +15,11 @@ import { useBranches } from "@/context/BranchContext";
 
 const studyYears = ["All", "1st Year", "2nd Year", "3rd Year", "4th Year"];
 
-const getMimeTypeFromDataUrl = (dataUrl: string): string => {
-    if (!dataUrl || !dataUrl.startsWith('data:')) return 'application/octet-stream';
-    return dataUrl.substring(dataUrl.indexOf(':') + 1, dataUrl.indexOf(';'));
+const isPdfUrl = (url: string): boolean => {
+    if (!url) return false;
+    if (url.startsWith('data:application/pdf')) return true;
+    if (url.toLowerCase().endsWith('.pdf')) return true;
+    return false;
 };
 
 export default function ExamPapersPage() {
@@ -107,7 +109,7 @@ export default function ExamPapersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredPapers.map((paper: QuestionPaper) => {
-            const isPdf = getMimeTypeFromDataUrl(paper.documentUrl) === 'application/pdf';
+            const canReadPdf = isPdfUrl(paper.documentUrl);
             return (
               <Card key={paper.id} className="flex flex-col">
                 <CardHeader>
@@ -124,7 +126,7 @@ export default function ExamPapersPage() {
                   </div>
                 </CardContent>
                 <div className="p-4 pt-0 grid grid-cols-2 gap-2">
-                   {isPdf ? (
+                   {canReadPdf ? (
                         <Button asChild variant="outline">
                            <Link href={`/exam-papers/${paper.id}/read`}>
                             <BookOpen className="mr-2 h-4 w-4" /> Read

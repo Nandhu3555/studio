@@ -59,28 +59,34 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-const getMimeTypeFromDataUrl = (dataUrl: string): string => {
-    if (!dataUrl || !dataUrl.startsWith('data:')) return 'application/octet-stream';
-    return dataUrl.substring(dataUrl.indexOf(':') + 1, dataUrl.indexOf(';'));
+const isPdfUrl = (url: string): boolean => {
+    if (!url) return false;
+    if (url.startsWith('data:application/pdf')) return true;
+    if (url.toLowerCase().endsWith('.pdf')) return true;
+    return false;
 };
 
-const getFileExtensionFromDataUrl = (dataUrl: string): string => {
-    if (!dataUrl || !dataUrl.startsWith('data:')) return 'bin';
-    const mimeType = getMimeTypeFromDataUrl(dataUrl);
-    switch (mimeType) {
-        case 'application/pdf':
-            return 'pdf';
-        case 'application/msword':
-            return 'doc';
-        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            return 'docx';
-        case 'application/vnd.ms-powerpoint':
-            return 'ppt';
-        case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-            return 'pptx';
-        default:
-            const parts = mimeType.split('/');
-            return parts[parts.length - 1] || 'bin';
+const getFileExtensionFromUrl = (url: string): string => {
+    if (!url) return 'bin';
+    if (url.startsWith('data:')) {
+        const mimeType = url.substring(url.indexOf(':') + 1, url.indexOf(';'));
+        switch (mimeType) {
+            case 'application/pdf': return 'pdf';
+            case 'application/msword': return 'doc';
+            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': return 'docx';
+            case 'application/vnd.ms-powerpoint': return 'ppt';
+            case 'application/vnd.openxmlformats-officedocument.presentationml.presentation': return 'pptx';
+            default:
+                const parts = mimeType.split('/');
+                return parts[parts.length - 1] || 'bin';
+        }
+    }
+    try {
+        const path = new URL(url).pathname;
+        const extension = path.split('.').pop();
+        return extension || 'bin';
+    } catch (e) {
+        return 'bin';
     }
 };
 
@@ -154,8 +160,8 @@ export default function BookDetailPage() {
     );
   }
 
-  const fileExtension = getFileExtensionFromDataUrl(book.documentUrl);
-  const isPdf = getMimeTypeFromDataUrl(book.documentUrl) === 'application/pdf';
+  const fileExtension = getFileExtensionFromUrl(book.documentUrl);
+  const isPdf = isPdfUrl(book.documentUrl);
 
   return (
     <div className="bg-background min-h-screen">
@@ -187,15 +193,15 @@ export default function BookDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Button asChild size="lg" className="md:col-span-1">
+          <Button asChild size="lg" className="md:col-span-1" disabled={!isPdf}>
             {isPdf ? (
               <Link href={`/book/${book.id}/read`}>
                 <BookOpen className="mr-2 h-4 w-4" /> Read Book
               </Link>
             ) : (
-               <a href={book.documentUrl} download={`${book.title}.${fileExtension}`}>
-                <BookOpen className="mr-2 h-4 w-4" /> Read Book
-              </a>
+               <div className="flex items-center">
+                    <BookOpen className="mr-2 h-4 w-4" /> Read Book
+                </div>
             )}
           </Button>
           <Button asChild size="lg" variant="secondary" className="md:col-span-1">
