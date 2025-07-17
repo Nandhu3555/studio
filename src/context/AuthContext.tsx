@@ -35,17 +35,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
       const admin = localStorage.getItem('isAdmin') === 'true';
-      const storedUser = localStorage.getItem('user');
+      const storedEmail = localStorage.getItem('userEmail');
       
       setIsLoggedIn(loggedIn);
       setIsAdmin(admin);
-      setUser(storedUser ? JSON.parse(storedUser) : null);
+
+      if (loggedIn && storedEmail) {
+        if (admin) {
+            setUser({ 
+                id: 'admin',
+                name: 'Admin User', 
+                email: storedEmail,
+                password: 'nandhu@sunny', // Prototype only
+                createdAt: new Date(),
+                branch: 'Administration',
+                year: 0,
+            });
+        } else {
+            const foundUser = findUserByEmail(storedEmail);
+            setUser(foundUser || null);
+        }
+      } else {
+        setUser(null);
+      }
+
     } catch (error) {
         console.error("Could not access local storage for auth:", error);
     } finally {
         setIsAuthReady(true);
     }
-  }, []);
+  }, [findUserByEmail]);
 
   useEffect(() => {
     loadStateFromLocalStorage();
@@ -96,7 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('isAdmin', role === 'admin' ? 'true' : 'false');
-          localStorage.setItem('user', JSON.stringify(userData));
+          // Store only non-sensitive identifier, not the whole user object
+          localStorage.setItem('userEmail', userData.email);
           notifyAuthChange();
       } catch (error) {
           console.error("Could not access local storage:", error);
@@ -112,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('isAdmin');
-        localStorage.removeItem('user');
+        localStorage.removeItem('userEmail');
         notifyAuthChange();
     } catch (error) {
         console.error("Could not access local storage:", error);
@@ -127,7 +147,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(updatedUser);
         updateUserInUserContext(updatedUser.id, data);
         try {
-            localStorage.setItem('user', JSON.stringify(updatedUser));
+            // If email is changed, update it in localStorage
+            if (data.email) {
+                localStorage.setItem('userEmail', data.email);
+            }
             notifyAuthChange();
         } catch (error) {
             console.error("Could not access local storage:", error);
