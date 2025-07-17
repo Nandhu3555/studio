@@ -61,12 +61,11 @@ export default function Home() {
               </div>
               <div className="hidden md:block">
                   <Image
-                      src="https://placehold.co/600x400/3F51B5/E8EAF6"
+                      src="https://placehold.co/600x400/7e57c2/e8eaf6"
                       alt="A stack of colorful books."
                       width={600}
                       height={400}
-                      className="rounded-lg"
-                      priority
+                      className="rounded-lg shadow-2xl"
                       data-ai-hint="colorful books"
                   />
               </div>
