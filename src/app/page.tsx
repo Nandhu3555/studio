@@ -61,7 +61,7 @@ export default function Home() {
               </div>
               <div className="hidden md:block">
                   <Image
-                      src="https://placehold.co/600x400.png"
+                      src="https://placehold.co/600x400/3F51B5/E8EAF6"
                       alt="A stack of colorful books."
                       width={600}
                       height={400}
