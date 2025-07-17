@@ -14,16 +14,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { categories } from "@/lib/mock-data";
-import { sendOtp } from "@/ai/flows/send-otp-flow";
 import { useNotifications } from "@/context/NotificationContext";
 
-type UserDetails = {
-    name: string;
-    email: string;
-    password: string;
-    branch: string;
-    year: string;
-};
 
 export default function SignupPage() {
   const router = useRouter();
@@ -31,14 +23,10 @@ export default function SignupPage() {
   const { login } = useAuth();
   const { toast } = useToast();
   const { addNotification } = useNotifications();
-  
-  const [step, setStep] = useState<'details' | 'otp'>('details');
-  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-  const [generatedOtp, setGeneratedOtp] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
 
-  const handleDetailsSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSignupSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     const formData = new FormData(event.currentTarget);
@@ -69,61 +57,36 @@ export default function SignupPage() {
     }
 
     try {
-        const { otp } = await sendOtp({ email });
-        setGeneratedOtp(otp);
-        setUserDetails({ name, email, password, branch, year });
-        setStep('otp');
-        toast({
-            title: "OTP Sent!",
-            description: `For testing, your OTP is: ${otp}`,
-            duration: 9000,
+        const newUser = addUser({ 
+            name: name, 
+            email: email, 
+            password: password, 
+            branch: branch, 
+            year: parseInt(year) 
         });
+        login(newUser.email, 'student');
+        addNotification({
+            type: 'new_user',
+            title: 'Welcome to B-Tech Lib!',
+            description: 'Your account has been created successfully.',
+        });
+        toast({
+            title: "Account Created!",
+            description: "Welcome to B-Tech Lib.",
+        });
+        router.push('/');
     } catch (error) {
-        console.error("Failed to get OTP:", error);
+        console.error("Failed to create account:", error);
         toast({
             variant: "destructive",
-            title: "OTP Generation Failed",
-            description: "Could not generate an OTP. Please try again.",
+            title: "Signup Failed",
+            description: "Could not create your account. Please try again.",
         });
     } finally {
         setIsLoading(false);
     }
   };
 
-  const handleOtpSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    const formData = new FormData(event.currentTarget);
-    const otp = formData.get('otp') as string;
-
-    if (otp === generatedOtp && userDetails) {
-      const newUser = addUser({ 
-          name: userDetails.name, 
-          email: userDetails.email, 
-          password: userDetails.password, 
-          branch: userDetails.branch, 
-          year: parseInt(userDetails.year) 
-      });
-      login(newUser.email, 'student');
-      addNotification({
-        type: 'new_user',
-        title: 'Welcome to B-Tech Lib!',
-        description: 'Your account has been created successfully.',
-      });
-      toast({
-        title: "Account Created!",
-        description: "Welcome to B-Tech Lib.",
-      });
-      router.push('/');
-    } else {
-        toast({
-            variant: "destructive",
-            title: "Invalid OTP",
-            description: "The OTP you entered is incorrect. Please try again.",
-        });
-        setIsLoading(false);
-    }
-  };
   
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
@@ -139,15 +102,14 @@ export default function SignupPage() {
                 </span>
             </Link>
           <CardTitle className="font-headline text-2xl mt-4">
-            {step === 'details' ? 'Create an account' : 'Enter OTP'}
+            Create an account
           </CardTitle>
           <CardDescription>
-            {step === 'details' ? 'Enter your information to get started.' : `An OTP has been sent to ${userDetails?.email}`}
+            Enter your information to get started.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {step === 'details' ? (
-            <form className="space-y-4" onSubmit={handleDetailsSubmit}>
+            <form className="space-y-4" onSubmit={handleSignupSubmit}>
                 <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input id="name" name="name" placeholder="John Doe" required />
@@ -188,7 +150,7 @@ export default function SignupPage() {
                     </Select>
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending OTP...</> : "Get OTP"}
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account...</> : "Create Account"}
                 </Button>
                 <div className="mt-4 text-center text-sm">
                 Already have an account?{" "}
@@ -197,22 +159,6 @@ export default function SignupPage() {
                 </Link>
                 </div>
             </form>
-          ) : (
-            <form className="space-y-4" onSubmit={handleOtpSubmit}>
-                <div className="space-y-2">
-                    <Label htmlFor="otp">One-Time Password</Label>
-                    <Input id="otp" name="otp" type="text" placeholder="Enter 6-digit OTP" required maxLength={6} />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</> : "Verify & Create Account"}
-                </Button>
-                <div className="mt-4 text-center text-sm">
-                    <Button variant="link" type="button" onClick={() => setStep('details')}>
-                        Back to details
-                    </Button>
-                </div>
-            </form>
-          )}
         </CardContent>
       </Card>
     </div>

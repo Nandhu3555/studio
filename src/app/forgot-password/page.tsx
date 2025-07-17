@@ -13,7 +13,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { sendOtp } from "@/ai/flows/send-otp-flow";
 import { BookOpen, Loader2 } from "lucide-react";
 import { useUsers } from "@/context/UserContext";
 import { useNotifications } from "@/context/NotificationContext";
@@ -33,7 +32,6 @@ export default function ForgotPasswordPage() {
   
   const [step, setStep] = useState<'email' | 'reset'>('email');
   const [userEmail, setUserEmail] = useState<string>('');
-  const [generatedOtp, setGeneratedOtp] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const emailForm = useForm<EmailValues>({
@@ -52,34 +50,17 @@ export default function ForgotPasswordPage() {
         setIsLoading(false);
         return;
     }
-
-    try {
-        const { otp } = await sendOtp({ email: values.email });
-        setGeneratedOtp(otp);
-        setUserEmail(values.email);
-        setStep('reset');
-        toast({
-            title: "OTP Sent!",
-            description: `For testing, your OTP is: ${otp}`,
-            duration: 9000
-        });
-    } catch (error) {
-        console.error("Failed to get OTP:", error);
-        toast({
-            variant: "destructive",
-            title: "OTP Generation Failed",
-            description: "Could not generate an OTP. Please try again.",
-        });
-    } finally {
-        setIsLoading(false);
-    }
+    
+    // In a real app, you would send a reset link. Here we just proceed.
+    setUserEmail(values.email);
+    setStep('reset');
+    setIsLoading(false);
   };
 
   const handleResetSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     const formData = new FormData(event.currentTarget);
-    const otp = formData.get('otp') as string;
     const newPassword = formData.get('newPassword') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
 
@@ -93,28 +74,20 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    if (otp === generatedOtp) {
-      // In a real app, you would now update the user's password in your database.
-      // For this prototype, we'll just simulate success.
-      console.log(`Password for ${userEmail} has been reset to: ${newPassword}`);
-       addNotification({
-        type: 'password_changed',
-        title: 'Security Alert',
-        description: 'Your password was changed successfully.',
-      });
-      toast({
-        title: "Password Reset Successful",
-        description: "You can now log in with your new password.",
-      });
-      router.push('/login');
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Invalid OTP",
-        description: "The OTP you entered is incorrect. Please try again.",
-      });
-      setIsLoading(false);
-    }
+    // In a real app, you would now update the user's password in your database.
+    // For this prototype, we'll just simulate success.
+    console.log(`Password for ${userEmail} has been reset to: ${newPassword}`);
+    addNotification({
+    type: 'password_changed',
+    title: 'Security Alert',
+    description: 'Your password was changed successfully.',
+    });
+    toast({
+    title: "Password Reset Successful",
+    description: "You can now log in with your new password.",
+    });
+    router.push('/login');
+    
   };
 
   return (
@@ -134,7 +107,7 @@ export default function ForgotPasswordPage() {
             {step === 'email' ? 'Forgot Password' : 'Reset Your Password'}
           </CardTitle>
           <CardDescription>
-            {step === 'email' ? "Enter your email to receive a reset code." : `Enter the OTP sent to ${userEmail} and your new password.`}
+            {step === 'email' ? "Enter your email to reset your password." : `Enter your new password for ${userEmail}.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -153,16 +126,12 @@ export default function ForgotPasswordPage() {
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending Code...</> : "Send Reset Code"}
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying Email...</> : "Continue"}
                 </Button>
               </form>
             </Form>
           ) : (
             <form onSubmit={handleResetSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="otp">One-Time Password (OTP)</Label>
-                  <Input id="otp" name="otp" placeholder="6-digit code" maxLength={6} required />
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="newPassword">New Password</Label>
                   <Input id="newPassword" name="newPassword" type="password" required />
