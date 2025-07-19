@@ -40,8 +40,8 @@ export default function Home() {
                 <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
             </div>
 
-          <div className="relative grid md:grid-cols-2 gap-8 items-center">
-              <div className="space-y-6">
+          <div className="relative flex flex-col-reverse md:grid md:grid-cols-2 gap-8 items-center">
+               <div className="mt-8 md:mt-0 space-y-6 text-center md:text-left">
                   <h1 className="text-4xl md:text-6xl font-bold font-headline text-primary tracking-tight">
                       Your Digital Library
                   </h1>
@@ -59,13 +59,13 @@ export default function Home() {
                     </Button>
                   </div>
               </div>
-              <div className="hidden md:block">
+              <div className="flex justify-center">
                   <Image
                       src="https://placehold.co/600x400/7e57c2/e8eaf6"
                       alt="A stack of colorful books."
                       width={600}
                       height={400}
-                      className="rounded-lg shadow-2xl"
+                      className="rounded-lg shadow-2xl max-w-full h-auto"
                       data-ai-hint="colorful books"
                   />
               </div>
