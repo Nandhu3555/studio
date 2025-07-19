@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -92,6 +93,7 @@ type UploadPaperValues = z.infer<typeof uploadPaperSchema>;
 
 
 export default function AdminPage() {
+    const searchParams = useSearchParams();
     const { isAdmin, isLoggedIn, isAuthReady } = useAuth();
     const router = useRouter();
 

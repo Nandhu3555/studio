@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Download, FileText, BookOpen, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { useQuestionPapers } from "@/context/QuestionPaperContext";
 import { type QuestionPaper } from "@/lib/mock-data";
@@ -23,6 +24,7 @@ const isPdfUrl = (url: string): boolean => {
 };
 
 export default function ExamPapersPage() {
+  const searchParams = useSearchParams();
   const { papers } = useQuestionPapers();
   const { branches } = useBranches();
   const { toast } = useToast();

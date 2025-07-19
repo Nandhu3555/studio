@@ -2,6 +2,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ const fileToDataUrl = (file: File): Promise<string> => {
 };
 
 export default function ProfilePage() {
+    const searchParams = useSearchParams();
     const { user, isLoggedIn, isAdmin, logout, isAuthReady, updateUser } = useAuth();
     const router = useRouter();
     const { setTheme } = useTheme();

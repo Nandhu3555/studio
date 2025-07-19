@@ -4,6 +4,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { type Book } from "@/lib/mock-data";
 import { useBooks } from "@/context/BookContext";
 import { useCategories } from "@/context/CategoryContext";
@@ -19,6 +20,7 @@ const studyYears = [
 ];
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeYear, setActiveYear] = useState("All Years");
   const [searchTerm, setSearchTerm] = useState("");
