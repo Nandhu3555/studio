@@ -64,7 +64,7 @@ export default function SignupPage() {
             branch: branch, 
             year: parseInt(year) 
         });
-        login(newUser.email, 'student');
+        login('student', newUser);
         addNotification({
             type: 'new_user',
             title: 'Welcome to B-Tech Lib!',

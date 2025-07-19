@@ -9,6 +9,7 @@ interface UserContextType {
   addUser: (user: Omit<User, 'id' | 'createdAt' | 'avatarUrl'>) => User;
   findUserByEmail: (email: string) => User | undefined;
   updateUser: (id: string, data: Partial<User>) => void;
+  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -50,7 +51,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         id: (Math.random() * 1000).toString(),
         createdAt: new Date(),
     };
-    setUsers(prevUsers => [newUser, ...prevUsers]);
+    // The login function in AuthContext will now be responsible for adding the user to state
+    // to ensure correct synchronization.
     return newUser;
   };
   
@@ -65,7 +67,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <UserContext.Provider value={{ users, addUser, findUserByEmail, updateUser }}>
+    <UserContext.Provider value={{ users, setUsers, addUser, findUserByEmail, updateUser }}>
       {children}
     </UserContext.Provider>
   );

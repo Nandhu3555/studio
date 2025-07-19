@@ -49,7 +49,7 @@ export default function LoginPage() {
     const user = findUserByEmail(values.email);
 
     if (user && user.password === values.password) {
-      login(values.email, 'student');
+      login('student', user);
       toast({ title: "Login Successful", description: "Welcome back!" });
       router.push('/');
     } else {
@@ -63,7 +63,7 @@ export default function LoginPage() {
 
   const onAdminSubmit = (values: AdminLoginValues) => {
     if (values.email === "gnreddy3555@gmail.com" && values.password === "nandhu@sunny") {
-      login(values.email, 'admin');
+      login('admin', { email: values.email });
       toast({ title: "Admin Login Successful", description: "Redirecting to dashboard..." });
       router.push('/admin');
     } else {

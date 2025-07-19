@@ -12,7 +12,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isAdmin: boolean;
   user: LoggedInUser | null;
-  login: (email: string, role: 'student' | 'admin') => void;
+  login: (role: 'student' | 'admin', user: User | { email: string }) => void;
   logout: () => void;
   updateUser: (data: Partial<LoggedInUser>) => void;
   isAuthReady: boolean;
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<LoggedInUser | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const router = useRouter();
-  const { findUserByEmail, updateUser: updateUserInUserContext } = useUsers();
+  const { findUserByEmail, updateUser: updateUserInUserContext, setUsers } = useUsers();
 
   const loadStateFromLocalStorage = useCallback(() => {
     try {
@@ -86,14 +86,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authChannel?.postMessage({ type: 'AUTH_CHANGE' });
   };
 
-  const login = (email: string, role: 'student' | 'admin') => {
+  const login = (role: 'student' | 'admin', user: User | { email: string }) => {
     let userData: LoggedInUser | null = null;
     
     if (role === 'admin') {
         userData = { 
             id: 'admin',
             name: 'Admin User', 
-            email, 
+            email: user.email, 
             password: 'nandhu@sunny', // This is just for the prototype
             createdAt: new Date(),
             branch: 'Administration',
@@ -101,9 +101,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             avatarUrl: undefined,
         };
     } else {
-        const foundUser = findUserByEmail(email);
-        if (foundUser) {
-            userData = foundUser;
+        // 'user' must be a full User object for students
+        if ('id' in user) {
+             // If it's a new user, add them to the UserContext state first
+            if (!findUserByEmail(user.email)) {
+                setUsers(prevUsers => [user, ...prevUsers]);
+            }
+            userData = user;
         }
     }
     
