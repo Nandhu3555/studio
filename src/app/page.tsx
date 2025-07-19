@@ -35,7 +35,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <section className="relative text-center md:text-left py-16 md:py-24 rounded-lg overflow-hidden mb-12">
+      <section className="relative text-center py-16 md:py-24 rounded-lg overflow-hidden mb-12">
            <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] dark:bg-background dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)]">
                 <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
             </div>
@@ -113,7 +113,7 @@ export default function Home() {
             </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredBooks.map((book) => (
             <BookCard key={book.id} book={book} />
           ))}
@@ -143,37 +143,37 @@ function BookCard({ book }: { book: Book }) {
             alt={`Cover of ${book.title}`}
             width={400}
             height={600}
-            className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
             data-ai-hint={book.data_ai_hint}
           />
         </Link>
       </CardHeader>
-      <CardContent className="p-4 flex-grow">
-        <CardTitle className="font-headline text-lg leading-tight mb-1">
-          <Link href={`/book/${book.id}`} className="hover:text-primary transition-colors">
+      <CardContent className="p-3 flex-grow">
+        <CardTitle className="font-headline text-base leading-tight mb-1">
+          <Link href={`/book/${book.id}`} className="hover:text-primary transition-colors line-clamp-2">
             {book.title}
           </Link>
         </CardTitle>
-        <p className="text-sm text-muted-foreground">by {book.author} ({book.year})</p>
+        <p className="text-xs text-muted-foreground">by {book.author} ({book.year})</p>
       </CardContent>
-      <CardFooter className="p-4 pt-0 mt-auto flex justify-between items-center">
-        <div className="flex gap-4">
-          <div className="flex items-center gap-1 text-sm">
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-like hover:bg-like/10" onClick={() => setLikes(l => l + 1)}>
+      <CardFooter className="p-3 pt-0 mt-auto flex justify-between items-center">
+        <div className="flex gap-2">
+          <div className="flex items-center gap-1 text-xs">
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-like hover:bg-like/10" onClick={() => setLikes(l => l + 1)}>
               <ThumbsUp className="h-4 w-4" />
             </Button>
             <span className="text-muted-foreground">{likes}</span>
           </div>
-          <div className="flex items-center gap-1 text-sm">
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-dislike hover:bg-dislike/10" onClick={() => setDislikes(d => d + 1)}>
+          <div className="flex items-center gap-1 text-xs">
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-dislike hover:bg-dislike/10" onClick={() => setDislikes(d => d + 1)}>
               <ThumbsDown className="h-4 w-4" />
             </Button>
             <span className="text-muted-foreground">{dislikes}</span>
           </div>
         </div>
-        <Button asChild size="sm" variant="ghost">
+        <Button asChild size="sm" variant="ghost" className="text-xs h-7">
           <Link href={`/book/${book.id}`}>
-            Details <ArrowRight className="ml-2 h-4 w-4" />
+            Details <ArrowRight className="ml-1 h-3 w-3" />
           </Link>
         </Button>
       </CardFooter>
